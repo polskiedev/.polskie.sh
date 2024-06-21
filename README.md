@@ -1,1 +1,1 @@
-# .polskie.bash
+# .polskie.sh
