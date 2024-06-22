@@ -60,6 +60,13 @@ first_run() {
     make_symlinks
 }
 
+deploy() {
+    initialize
+    makefile
+    make_symlinks
+    source "$PATH_POLSKIE_SH/.output/sources.sh"
+}
+
 # Check the parameter and call the corresponding function
 if [ -z "$1" ]; then
     # No parameter passed, default to help
@@ -84,6 +91,9 @@ else
             ;;
         "first-run")
             first_run
+            ;;
+        "deploy")
+            deploy
             ;;
         *)
             echo "Invalid parameter. Usage: ./setup.sh ["first-run"|init|update|"make:links"|"make:file"]"

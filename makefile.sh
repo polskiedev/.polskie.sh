@@ -53,7 +53,9 @@ __polskiesh_makefile() {
 
     # Write the .sh files to the output file
     > "$output_file"  # Clear the file first
-
+    echo "#!/bin/bash" >> "$output_file"
+    echo "" >> "$output_file"
+    
     # Loop over each subfolder
     find "$dir" -type d | sort | while IFS= read -r sub_dir; do
         # Skip ignored subfolders
@@ -81,7 +83,7 @@ __polskiesh_makefile() {
                 echo "Ignoring file ${sh_file#$dir/}..."
                 continue
             fi
-            echo "source $(realpath "$sh_file")" >> "$output_file"
+            echo "source \"$(realpath "$sh_file")\"" >> "$output_file"
         done
     done
 }
@@ -120,7 +122,7 @@ elif [ "$1" = "--init" ]; then
 
         echo "Makefile: $module_name"
         __polskiesh_makefile "$module_name"
-        echo "source $(realpath "$output_dir/${module_name}.sources.sh")" >> "$output_file"
+        echo "source \"$(realpath "$output_dir/${module_name}.sources.sh")\"" >> "$output_file"
 	done
 
     source "$output_file"
