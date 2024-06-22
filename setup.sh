@@ -61,16 +61,41 @@ first_run() {
 }
 
 deploy() {
+    echo "Run: deploy()"
     initialize
     makefile
     make_symlinks
     source "$PATH_POLSKIE_SH/.output/sources.sh"
+    source "$PATH_POLSKIE_SH/.output/sources.alias.sh"
+}
+
+test() {
+    echo "Run: test()"
+    deploy
+    list=("system" "modules")
+    
+    # Define the find command and filter based on the presence of $1
+    if [ -z "$1" ]; then
+        filter=(-name "*.test.sh")
+    else
+        filter=(-name "*$1*" -name "*.test.sh")
+    fi
+
+    # Iterate over the list of items and process test files
+    for item in "${list[@]}"; do
+        find "$item" -type f "${filter[@]}" | sort | while read -r file; do
+            # chmod +x "$item"
+            echo "Processing test file: $file"
+            source "$file"
+        done
+    done
 }
 
 # Check the parameter and call the corresponding function
 if [ -z "$1" ]; then
     # No parameter passed, default to help
     help
+    hero
 else
     # Parameter passed, execute the corresponding function
     case "$1" in
@@ -94,6 +119,10 @@ else
             ;;
         "deploy")
             deploy
+            ;;
+        "test")
+            shift
+            test "$@"
             ;;
         *)
             echo "Invalid parameter. Usage: ./setup.sh ["first-run"|init|update|"make:links"|"make:file"]"

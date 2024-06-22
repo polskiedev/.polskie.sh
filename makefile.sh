@@ -6,6 +6,7 @@ __polskiesh_makefile() {
     local dir="$PATH_POLSKIE_SH/$module_name"
     local output_dir="$PATH_POLSKIE_SH/.output"
     local output_file="$output_dir/${module_name}.sources.sh"
+    local output_alias_file="$output_dir/alias.${module_name}.sources.sh"
     local ignore_file=".ignore"
 
     # Check if the first parameter is a directory
@@ -55,7 +56,11 @@ __polskiesh_makefile() {
     > "$output_file"  # Clear the file first
     echo "#!/bin/bash" >> "$output_file"
     echo "" >> "$output_file"
-    
+
+    > "$output_alias_file"  # Clear the file first
+    echo "#!/bin/bash" >> "$output_alias_file"
+    echo "" >> "$output_alias_file"
+
     # Loop over each subfolder
     find "$dir" -type d | sort | while IFS= read -r sub_dir; do
         # Skip ignored subfolders
@@ -76,14 +81,24 @@ __polskiesh_makefile() {
             echo "Directory '$sub_dir' has ignore file"
         fi
 
-        # Find .sh files in the subfolder
-        find "$sub_dir" -maxdepth 1 -type f -name "*.sh" | sort | while IFS= read -r sh_file; do
+        # Find .sh files in the subfolder, except .test.sh files and alias.sh files
+        find "$sub_dir" -maxdepth 1 -type f -name "*.sh" | grep -v "\.test\.sh$" | grep -v "alias\.sh$" | sort | while IFS= read -r sh_file; do
             # Skip ignored files
             if is_ignored "${sh_file#$dir/}"; then
                 echo "Ignoring file ${sh_file#$dir/}..."
                 continue
             fi
             echo "source \"$(realpath "$sh_file")\"" >> "$output_file"
+        done
+        
+        # Find alias.sh files to process last
+        find "$sub_dir" -maxdepth 1 -type f -name "alias.sh" | sort | while IFS= read -r sh_file; do
+            # Skip ignored files
+            if is_ignored "${sh_file#$dir/}"; then
+                echo "Ignoring file ${sh_file#$dir/}..."
+                continue
+            fi
+            echo "source \"$(realpath "$sh_file")\"" >> "$output_alias_file"
         done
     done
 }
@@ -101,29 +116,45 @@ elif [ "$1" = "--init" ]; then
 	list=("system" "modules")
     output_dir="$PATH_POLSKIE_SH/.output"
     output_file="$output_dir/sources.sh"
+    output_alias_file="$output_dir/sources.alias.sh"
+    output_packages_file="$output_dir/sources.packages.sh"
+
+    > "$output_packages_file"  # Clear the file first
+    echo "#!/bin/bash" >> "$output_packages_file"
+    echo "" >> "$output_packages_file"
+    echo "echo \"Loaded: .polskie.sh/sources.packages.sh\"" >> "$output_packages_file"
+    # echo "if [ -z \"\$IS_SOURCED_POLSKIESH\" ]; then" >> "$output_packages_file"
+    # echo "  IS_SOURCED_POLSKIESH=true" >> "$output_packages_file"
+    # echo "  echo \"Loaded: .polskie.sh/sources.packages.sh\"" >> "$output_packages_file"
+    # echo "else" >> "$output_packages_file"
+    # echo "  echo \"Script '.polskie.sh/sources.packages.sh' already sourced.\"" >> "$output_packages_file"
+    # echo "  return 1" >> "$output_packages_file"
+    # echo "fi" >> "$output_packages_file"
+    echo "" >> "$output_packages_file"
+
+	# Loop through each element in the array
+	for item in "${list[@]}"; do
+        echo "Makefile: $item"
+        __polskiesh_makefile "$item"
+        echo "source \"$(realpath "$output_dir/${item}.sources.sh")\"" >> "$output_packages_file"
+	done
+
+    > "$output_alias_file"
+    echo "#!/bin/bash" >> "$output_alias_file"
+    echo "" >> "$output_alias_file"
+    echo "echo \"Loaded: .polskie.sh/sources.alias.sh\"" >> "$output_alias_file"
+    echo "" >> "$output_alias_file"
+
+	for item in "${list[@]}"; do
+        echo "source \"$(realpath "$output_dir/alias.${item}.sources.sh")\"" >> "$output_alias_file"
+	done
 
     > "$output_file"  # Clear the file first
-
     echo "#!/bin/bash" >> "$output_file"
     echo "" >> "$output_file"
     echo "echo \"Loaded: .polskie.sh/sources.sh\"" >> "$output_file"
-    # echo "if [ -z \"\$IS_SOURCED_POLSKIESH\" ]; then" >> "$output_file"
-    # echo "  IS_SOURCED_POLSKIESH=true" >> "$output_file"
-    # echo "  echo \"Loaded: .polskie.sh/sources.sh\"" >> "$output_file"
-    # echo "else" >> "$output_file"
-    # echo "  echo \"Script '.polskie.sh/sources.sh' already sourced.\"" >> "$output_file"
-    # echo "  return 1" >> "$output_file"
-    # echo "fi" >> "$output_file"
-    echo "" >> "$output_file"
-
-	# Loop through each element in the array
-	for element in "${list[@]}"; do
-        module_name="$element"
-
-        echo "Makefile: $module_name"
-        __polskiesh_makefile "$module_name"
-        echo "source \"$(realpath "$output_dir/${module_name}.sources.sh")\"" >> "$output_file"
-	done
-
-    source "$output_file"
+    echo "source \"$(realpath "$output_dir/sources.packages.sh")\"" >> "$output_file"
+    echo "source \"$(realpath "$output_dir/sources.alias.sh")\"" >> "$output_file"
+    
+    # source "$output_file"
 fi
