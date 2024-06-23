@@ -91,6 +91,14 @@ test() {
     done
 }
 
+docker_console() {
+    docker run --rm -it "devenv-test" bash
+}
+
+docker_start() {
+    ./.symlinks/docker/start.docker.sh
+}
+
 # Check the parameter and call the corresponding function
 if [ -z "$1" ]; then
     # No parameter passed, default to help
@@ -123,6 +131,13 @@ else
         "test")
             shift
             test "$@"
+            ;;
+        "docker:start" | "d:s")
+            docker_start
+            ;;
+        "docker:console" | "d:c")
+            docker_start
+            docker_console
             ;;
         *)
             echo "Invalid parameter. Usage: ./setup.sh ["first-run"|init|update|"make:links"|"make:file"]"
