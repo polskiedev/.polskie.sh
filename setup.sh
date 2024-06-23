@@ -96,7 +96,7 @@ docker_console() {
 }
 
 docker_start() {
-    ./.symlinks/docker/start.docker.sh
+    ./.shared/docker/start.docker.sh
 }
 
 # Check the parameter and call the corresponding function

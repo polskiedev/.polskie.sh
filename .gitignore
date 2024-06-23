@@ -9,6 +9,9 @@
 .env/
 .output/
 .tests/
+.shared/
+.tmp/
+.temp/
 
 /vendor/
 node_modules/
@@ -26,4 +29,7 @@ submodules/
 
 .env
 .cache
+
+# project specific
+system/common
 
