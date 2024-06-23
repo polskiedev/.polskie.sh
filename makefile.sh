@@ -3,7 +3,18 @@
 # Function to check directories and process files
 __polskiesh_makefile() {
     local module_name="$1"
+    local module_external="${2:-0}"
     local dir="$PATH_POLSKIE_SH/$module_name"
+
+    # External modules
+    if [ $module_external -eq 1 ]; then
+        dir="$module_name"
+        module_name=$(basename "$module_name")
+        if [ "$module_name" = "functions" ]; then
+            module_name="common"
+        fi
+    fi
+
     local output_dir="$PATH_POLSKIE_SH/.output"
     local output_file="$output_dir/${module_name}.sources.sh"
     local output_alias_file="$output_dir/alias.${module_name}.sources.sh"
@@ -113,7 +124,7 @@ if [ "$1" = "--run" ]; then
         __polskiesh_makefile "$module_name"
     fi
 elif [ "$1" = "--init" ]; then
-	list=("system" "modules")
+	list=("system" "modules" "common")
     output_dir="$PATH_POLSKIE_SH/.output"
     output_file="$output_dir/sources.sh"
     output_alias_file="$output_dir/sources.alias.sh"
@@ -135,7 +146,13 @@ elif [ "$1" = "--init" ]; then
 	# Loop through each element in the array
 	for item in "${list[@]}"; do
         echo "Makefile: $item"
-        __polskiesh_makefile "$item"
+
+        if [ ! "$item" = "common" ]; then
+            __polskiesh_makefile "$item"
+        else
+            __polskiesh_makefile "$(realpath "$item")" 1
+        fi
+
         echo "source \"$(realpath "$output_dir/${item}.sources.sh")\"" >> "$output_packages_file"
 	done
 
@@ -153,8 +170,10 @@ elif [ "$1" = "--init" ]; then
     echo "#!/bin/bash" >> "$output_file"
     echo "" >> "$output_file"
     echo "echo \"Loaded: .polskie.sh/sources.sh\"" >> "$output_file"
-    echo "source \"$(realpath "$output_dir/sources.packages.sh")\"" >> "$output_file"
-    echo "source \"$(realpath "$output_dir/sources.alias.sh")\"" >> "$output_file"
+
+	for item in "${list[@]}"; do
+        echo "source \"$(realpath "$output_dir/sources.${item}.sh")\"" >> "$output_file"
+	done
     
     # source "$output_file"
 fi

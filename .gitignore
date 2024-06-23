@@ -31,5 +31,5 @@ submodules/
 .cache
 
 # project specific
-system/common
+common/
 
