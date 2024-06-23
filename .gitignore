@@ -30,6 +30,3 @@ submodules/
 .env
 .cache
 
-# project specific
-common/
-

@@ -172,7 +172,7 @@ elif [ "$1" = "--init" ]; then
     echo "echo \"Loaded: .polskie.sh/sources.sh\"" >> "$output_file"
 
 	for item in "${list[@]}"; do
-        echo "source \"$(realpath "$output_dir/sources.${item}.sh")\"" >> "$output_file"
+        echo "source \"$(realpath "$output_dir/${item}.sources.sh")\"" >> "$output_file"
 	done
     
     # source "$output_file"
