@@ -1,5 +1,8 @@
 #!/bin/bash
 
+source .env/vars.sh
+source "$HOME/.devenv/common/sources.sh" #temp
+
 # Function to check directories and process files
 __polskiesh_makefile() {
     local module_name="$1"
@@ -99,7 +102,9 @@ __polskiesh_makefile() {
                 echo "Ignoring file ${sh_file#$dir/}..."
                 continue
             fi
-            echo "source \"$(realpath "$sh_file")\"" >> "$output_file"
+            sh_file=$(realpath "$sh_file")
+            sh_file=$(replace_home_path "$sh_file")
+            echo "source \"$sh_file\"" >> "$output_file"
         done
         
         # Find alias.sh files to process last
@@ -109,7 +114,10 @@ __polskiesh_makefile() {
                 echo "Ignoring file ${sh_file#$dir/}..."
                 continue
             fi
-            echo "source \"$(realpath "$sh_file")\"" >> "$output_alias_file"
+
+            sh_file=$(realpath "$sh_file")
+            sh_file=$(replace_home_path "$sh_file")
+            echo "source \"$sh_file\"" >> "$output_alias_file"
         done
     done
 }
@@ -153,7 +161,9 @@ elif [ "$1" = "--init" ]; then
             __polskiesh_makefile "$(realpath "$item")" 1
         fi
 
-        echo "source \"$(realpath "$output_dir/${item}.sources.sh")\"" >> "$output_packages_file"
+        sh_file=$(realpath "$output_dir/${item}.sources.sh")
+        sh_file=$(replace_home_path "$sh_file")
+        echo "source \"$sh_file\"" >> "$output_packages_file"
 	done
 
     > "$output_alias_file"
@@ -163,16 +173,21 @@ elif [ "$1" = "--init" ]; then
     echo "" >> "$output_alias_file"
 
 	for item in "${list[@]}"; do
-        echo "source \"$(realpath "$output_dir/alias.${item}.sources.sh")\"" >> "$output_alias_file"
+        sh_file=$(realpath "$output_dir/alias.${item}.sources.sh")
+        sh_file=$(replace_home_path "$sh_file")
+        echo "source \"$sh_file\"" >> "$output_alias_file"
 	done
 
     > "$output_file"  # Clear the file first
     echo "#!/bin/bash" >> "$output_file"
     echo "" >> "$output_file"
     echo "echo \"Loaded: .polskie.sh/sources.sh\"" >> "$output_file"
-
+    echo "" >> "$output_file"
+    
 	for item in "${list[@]}"; do
-        echo "source \"$(realpath "$output_dir/${item}.sources.sh")\"" >> "$output_file"
+        sh_file=$(realpath "$output_dir/${item}.sources.sh")
+        sh_file=$(replace_home_path "$sh_file")
+        echo "source \"$sh_file\"" >> "$output_file"
 	done
     
     # source "$output_file"
