@@ -31,24 +31,6 @@ make_symlinks() {
     echo "Creating symlinks..."
 }
 
-# Define the function to check and create a symlink
-__create_symlink() {
-    local from="$1"
-    local to="$2"
-
-    if [ -e "$from" ]; then
-        if [ -L "$from" ]; then
-            echo "$from is already a symlink."
-        else
-            echo "Error: $from already exists as a directory."
-        fi
-    else
-        echo "$from is not a symlink. Creating a symlink..."
-        ln -s "$from" "$to"
-        echo "Symlink created from source '$from' to '$to'."
-    fi
-}
-
 makefile() {
     echo "Running makefile function..."
     ./makefile.sh --init
@@ -72,7 +54,6 @@ deploy() {
 test() {
     echo "Run: test()"
     replace_home_path "/root/ddd/root"
-
     # deploy
     # list=("system" "modules")
     

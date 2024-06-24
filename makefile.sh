@@ -19,8 +19,8 @@ __polskiesh_makefile() {
     fi
 
     local output_dir="$PATH_POLSKIE_SH/.output"
-    local output_file="$output_dir/${module_name}.sources.sh"
-    local output_alias_file="$output_dir/alias.${module_name}.sources.sh"
+    local output_file="$output_dir/package.compiled.${module_name}.sh"
+    local output_alias_file="$output_dir/package.alias.${module_name}.sh"
     local ignore_file=".ignore"
 
     # Check if the first parameter is a directory
@@ -142,13 +142,6 @@ elif [ "$1" = "--init" ]; then
     echo "#!/bin/bash" >> "$output_packages_file"
     echo "" >> "$output_packages_file"
     echo "echo \"Loaded: .polskie.sh/sources.packages.sh\"" >> "$output_packages_file"
-    # echo "if [ -z \"\$IS_SOURCED_POLSKIESH\" ]; then" >> "$output_packages_file"
-    # echo "  IS_SOURCED_POLSKIESH=true" >> "$output_packages_file"
-    # echo "  echo \"Loaded: .polskie.sh/sources.packages.sh\"" >> "$output_packages_file"
-    # echo "else" >> "$output_packages_file"
-    # echo "  echo \"Script '.polskie.sh/sources.packages.sh' already sourced.\"" >> "$output_packages_file"
-    # echo "  return 1" >> "$output_packages_file"
-    # echo "fi" >> "$output_packages_file"
     echo "" >> "$output_packages_file"
 
 	# Loop through each element in the array
@@ -161,7 +154,7 @@ elif [ "$1" = "--init" ]; then
             __polskiesh_makefile "$(realpath "$item")" 1
         fi
 
-        sh_file=$(realpath "$output_dir/${item}.sources.sh")
+        sh_file=$(realpath "$output_dir/packages.${item}.sh")
         sh_file=$(replace_home_path "$sh_file")
         echo "source \"$sh_file\"" >> "$output_packages_file"
 	done
@@ -173,7 +166,7 @@ elif [ "$1" = "--init" ]; then
     echo "" >> "$output_alias_file"
 
 	for item in "${list[@]}"; do
-        sh_file=$(realpath "$output_dir/alias.${item}.sources.sh")
+        sh_file=$(realpath "$output_dir/package.alias.${item}.sh")
         sh_file=$(replace_home_path "$sh_file")
         echo "source \"$sh_file\"" >> "$output_alias_file"
 	done
@@ -183,12 +176,11 @@ elif [ "$1" = "--init" ]; then
     echo "" >> "$output_file"
     echo "echo \"Loaded: .polskie.sh/sources.sh\"" >> "$output_file"
     echo "" >> "$output_file"
-    
-	for item in "${list[@]}"; do
-        sh_file=$(realpath "$output_dir/${item}.sources.sh")
+
+    list2=("sources.alias.sh" "sources.packages.sh")
+	for item2 in "${list2[@]}"; do
+        sh_file=$(realpath "$output_dir/$item2")
         sh_file=$(replace_home_path "$sh_file")
         echo "source \"$sh_file\"" >> "$output_file"
 	done
-    
-    # source "$output_file"
 fi
