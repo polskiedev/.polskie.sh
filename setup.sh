@@ -71,7 +71,6 @@ test() {
             source "$file"
         done
     done
-    ttt
 }
 
 docker_console() {
