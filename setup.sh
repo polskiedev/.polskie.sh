@@ -55,7 +55,8 @@ deploy() {
 run_tests() {
     echo "Run: run_tests()"
     deploy
-    list=("system" "modules")
+    list=("system" "modules" "common")
+
     # Define the find command and filter based on the presence of $1
     if [ -z "$1" ]; then
         filter=(-name "*.test.sh")
@@ -65,6 +66,11 @@ run_tests() {
 
     # Iterate over the list of items and process test files
     for item in "${list[@]}"; do
+
+        if [ "$item" = "common" ]; then
+            item="$(realpath "$PATH_POLSKIE_SH/.shared/.devenv/common")"
+        fi
+
         find "$item" -type f "${filter[@]}" | sort | while read -r file; do
             # chmod +x "$item"
             echo "Processing test file: $file"
