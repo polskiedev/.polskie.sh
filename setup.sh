@@ -85,7 +85,6 @@ docker_start() {
 if [ -z "$1" ]; then
     # No parameter passed, default to help
     help
-    hero
 else
     # Parameter passed, execute the corresponding function
     case "$1" in
