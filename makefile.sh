@@ -2,6 +2,8 @@
 
 source .env/vars.sh
 source "$HOME/.devenv/common/sources.sh" #temp
+# #cannot use code below, this code will create that file
+# source $(realpath "$HOME/.devenv.sources.sh")
 
 # Function to check directories and process files
 __polskiesh_makefile() {
@@ -104,7 +106,7 @@ __polskiesh_makefile() {
             fi
             sh_file=$(realpath "$sh_file")
             sh_file=$(replace_home_path "$sh_file")
-            echo "source \"$sh_file\"" >> "$output_file"
+            echo "source \"$sh_file\" || echo \"Failed to source '$sh_file'\"" >> "$output_file"
         done
         
         # Find alias.sh files to process last
@@ -117,7 +119,7 @@ __polskiesh_makefile() {
 
             sh_file=$(realpath "$sh_file")
             sh_file=$(replace_home_path "$sh_file")
-            echo "source \"$sh_file\"" >> "$output_alias_file"
+            echo "source \"$sh_file\" || echo \"Failed to source '$sh_file'\"" >> "$output_alias_file"
         done
     done
 }
@@ -151,10 +153,16 @@ elif [ "$1" = "--init" ]; then
         if [ ! "$item" = "common" ]; then
             __polskiesh_makefile "$item"
         else
-            __polskiesh_makefile "$(realpath "$item")" 1
+            __polskiesh_makefile "$(realpath "$PATH_POLSKIE_SH/.shared/.devenv/common/functions")" 1
         fi
 
-        sh_file=$(realpath "$output_dir/packages.${item}.sh")
+        sh_file=$(realpath "$output_dir/package.compiled.${item}.sh")
+
+        # Update source.sh in common folder
+        if [ "$item" = "common" ]; then
+            cp "$sh_file" "$(realpath "$PATH_POLSKIE_SH/.shared/.devenv/common")/sources.sh"
+        fi
+
         sh_file=$(replace_home_path "$sh_file")
         echo "source \"$sh_file\"" >> "$output_packages_file"
 	done

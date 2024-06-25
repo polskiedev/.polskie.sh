@@ -1,6 +1,8 @@
 #!/bin/bash
+
 source .env/vars.sh
 source "$HOME/.devenv/common/sources.sh" #temp
+# source $(realpath "$HOME/.devenv.sources.sh")
 
 # Define the help function
 help() {
@@ -47,31 +49,29 @@ deploy() {
     initialize
     makefile
     make_symlinks
-    source "$PATH_POLSKIE_SH/.output/sources.sh"
-    source "$PATH_POLSKIE_SH/.output/sources.alias.sh"
+    source $(realpath "$HOME/.devenv.sources.sh")
 }
 
 test() {
     echo "Run: test()"
-    replace_home_path "/root/ddd/root"
-    # deploy
-    # list=("system" "modules")
-    
-    # # Define the find command and filter based on the presence of $1
-    # if [ -z "$1" ]; then
-    #     filter=(-name "*.test.sh")
-    # else
-    #     filter=(-name "*$1*" -name "*.test.sh")
-    # fi
+    deploy
+    list=("system" "modules")
+    # Define the find command and filter based on the presence of $1
+    if [ -z "$1" ]; then
+        filter=(-name "*.test.sh")
+    else
+        filter=(-name "*$1*" -name "*.test.sh")
+    fi
 
-    # # Iterate over the list of items and process test files
-    # for item in "${list[@]}"; do
-    #     find "$item" -type f "${filter[@]}" | sort | while read -r file; do
-    #         # chmod +x "$item"
-    #         echo "Processing test file: $file"
-    #         source "$file"
-    #     done
-    # done
+    # Iterate over the list of items and process test files
+    for item in "${list[@]}"; do
+        find "$item" -type f "${filter[@]}" | sort | while read -r file; do
+            # chmod +x "$item"
+            echo "Processing test file: $file"
+            source "$file"
+        done
+    done
+    ttt
 }
 
 docker_console() {
@@ -79,7 +79,7 @@ docker_console() {
 }
 
 docker_start() {
-    ./.shared/docker/start.docker.sh
+    ./.shared/.devenv/docker/start.docker.sh
 }
 
 # Check the parameter and call the corresponding function
