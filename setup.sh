@@ -74,7 +74,7 @@ run_tests() {
         find "$item" -type f "${filter[@]}" | sort | while read -r file; do
             # chmod +x "$item"
             echo "Processing test file: $file"
-            source "$file"
+            bash "$file"
         done
     done
 }
@@ -90,7 +90,6 @@ docker_start() {
 test() {
     echo "Run: test()"
     run_tests "$@"
-    to_lowercase_new "ABCDefgh123"
 }
 
 # Check the parameter and call the corresponding function
