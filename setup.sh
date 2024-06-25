@@ -52,8 +52,8 @@ deploy() {
     source $(realpath "$HOME/.devenv.sources.sh")
 }
 
-test() {
-    echo "Run: test()"
+run_tests() {
+    echo "Run: run_tests()"
     deploy
     list=("system" "modules")
     # Define the find command and filter based on the presence of $1
@@ -79,6 +79,12 @@ docker_console() {
 
 docker_start() {
     ./.shared/.devenv/docker/start.docker.sh
+}
+
+test() {
+    echo "Run: test()"
+    run_tests "$@"
+    to_lowercase_new "ABCDefgh123"
 }
 
 # Check the parameter and call the corresponding function
