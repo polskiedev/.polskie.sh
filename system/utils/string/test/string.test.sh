@@ -1,9 +1,9 @@
 #!/bin/bash
-
+# devenv_precmd
 source $(realpath "$HOME/.devenv.sources.sh")
 
 test() {
-    # echo "Testing 'to_lowercase()' function"
+    log_info "Testing 'to_lowercase()' function"
 
     local text="HELLO world!"
     local result=$(to_lowercase "$text")
@@ -12,7 +12,7 @@ test() {
     echo "Text: $text"
     echo "Expected: $expected"
     echo "Output: $result"
-    [ "$result" = "$expected" ] && echo "Status: Passed" || echo "Status: Failed"
+    [ "$result" = "$expected" ] && log_success "Status: Passed"; return 0 || log_error "Status: Failed"; return 1
     echo "====="
 }
 

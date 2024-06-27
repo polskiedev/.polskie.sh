@@ -1,7 +1,8 @@
 #!/bin/bash
 
 log_success() {
-    echo -e "${FS_GREEN}[ERROR]${CP_RESET} $@" >&2
+    local title="SUCCESS"
+    echo -e "${FS_GREEN}[$title]${CP_RESET} $@" >&2
 }
 
 log_info() {

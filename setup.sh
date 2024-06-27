@@ -55,6 +55,12 @@ deploy() {
 run_tests() {
     echo "Run: run_tests()"
     deploy
+    compile_test_files
+    bash "$PATH_POLSKIE_SH/.output/package.tests.sh"
+    source $(realpath "$HOME/.devenv.sources.sh")
+}
+
+compile_test_files() {
     list=("system" "modules" "common")
 
     # Define the find command and filter based on the presence of $1
@@ -63,6 +69,16 @@ run_tests() {
     else
         filter=(-name "*$1*" -name "*.test.sh")
     fi
+
+    local output_file_name="package.tests.sh"
+    local output_dir="$PATH_POLSKIE_SH/.output"
+    local output_file="$output_dir/$output_file_name"
+
+    > "$output_file"  # Clear the file first
+    echo "#!/bin/bash" >> "$output_file"
+    echo "" >> "$output_file"
+    echo "echo \"Loaded: $output_file_name\"" >> "$output_file"
+    echo "" >> "$output_file"
 
     # Iterate over the list of items and process test files
     for item in "${list[@]}"; do
@@ -74,7 +90,8 @@ run_tests() {
         find "$item" -type f "${filter[@]}" | sort | while read -r file; do
             # chmod +x "$item"
             echo "Processing test file: $file"
-            bash "$file"
+            # bash "$file"
+            echo "source \"$file\" || echo \"Failed to source '$file'\"" >> "$output_file"
         done
     done
 }

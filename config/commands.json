@@ -1,0 +1,14 @@
+{
+    "commands": [
+        {
+            "command": "list",
+            "alias": "ls",
+            "description": "List files"
+        },
+        {
+            "command": "remove",
+            "alias": "rm",
+            "description": "Remove files"
+        }
+    ]
+}

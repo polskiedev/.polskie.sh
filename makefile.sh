@@ -104,6 +104,8 @@ __polskiesh_makefile() {
                 echo "Ignoring file ${sh_file#$dir/}..."
                 continue
             fi
+
+            echo "File: $sh_file"
             sh_file=$(realpath "$sh_file")
             sh_file=$(replace_home_path "$sh_file")
             echo "source \"$sh_file\" || echo \"Failed to source '$sh_file'\"" >> "$output_file"
@@ -116,7 +118,8 @@ __polskiesh_makefile() {
                 echo "Ignoring file ${sh_file#$dir/}..."
                 continue
             fi
-
+            
+            echo "File: $sh_file"
             sh_file=$(realpath "$sh_file")
             sh_file=$(replace_home_path "$sh_file")
             echo "source \"$sh_file\" || echo \"Failed to source '$sh_file'\"" >> "$output_alias_file"
