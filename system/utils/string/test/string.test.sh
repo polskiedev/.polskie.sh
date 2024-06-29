@@ -6,7 +6,7 @@ test() {
     log_info "Testing 'to_lowercase()' function"
 
     local text="HELLO world!"
-    local result=$(to_lowercase "$text")
+    local result=$(__polskiesh_to_lowercase "$text")
     local expected="hello world!"
 
     echo "Text: $text"

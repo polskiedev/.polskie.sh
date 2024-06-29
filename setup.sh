@@ -57,7 +57,7 @@ run_tests() {
     deploy
     compile_test_files
     bash "$PATH_POLSKIE_SH/.output/package.tests.sh"
-    source $(realpath "$HOME/.devenv.sources.sh")
+    # source $(realpath "$HOME/.devenv.sources.sh")
 }
 
 compile_test_files() {
@@ -107,6 +107,7 @@ docker_start() {
 test() {
     echo "Run: test()"
     run_tests "$@"
+    # run_tests --title="title test" --content="content text" --header:"header:in:colon" -a -r -g -s
 }
 
 # Check the parameter and call the corresponding function

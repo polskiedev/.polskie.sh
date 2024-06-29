@@ -1,27 +1,35 @@
 #!/bin/bash
 
+__polskiesh_log_message() {
+    local color="${1:-$FS_WHITE}"
+    local title="${2:-"MESSAGE"}"
+
+    shift; shift
+
+    echo -e "${color}[${title}]${CP_RESET} $@" >&2
+}
+
 log_success() {
-    local title="SUCCESS"
-    echo -e "${FS_GREEN}[$title]${CP_RESET} $@" >&2
+    __polskiesh_log_message "$FS_GREEN" "SUCCESS" "$@"
 }
 
 log_info() {
-    echo -e "${FS_BLUE}[INFO]${CP_RESET} $@"
+    __polskiesh_log_message "$FS_BLUE" "INFO" "$@"
 }
 
 log_error() {
-    echo -e "${FS_RED}[ERROR]${CP_RESET} $@" >&2
+    __polskiesh_log_message "$FS_RED" "ERROR" "$@"
 }
 
 log_debug() {
     
     if [ "$ENV_VERBOSE_LOGS" -eq 1 ]; then
-        echo -e "${FS_YELLOW}[DEBUG]${CP_RESET} $@" >&2
+        __polskiesh_log_message "$FS_YELLOW" "DEBUG" "$@"
     fi
 }
 
 log_verbose() {
    if [ "$ENV_VERBOSE_LOGS" -eq 1 ]; then
-        echo -e "${FS_MAGENTA}[VERBOSE]${CP_RESET} $@" >&2
+        __polskiesh_log_message "$FS_MAGENTA" "VERBOSE" "$@"
     fi
 }

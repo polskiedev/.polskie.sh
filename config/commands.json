@@ -6,9 +6,14 @@
             "description": "List files"
         },
         {
-            "command": "remove",
-            "alias": "rm",
-            "description": "Remove files"
+            "command": "cd:home",
+            "alias": "cd $HOME",
+            "description": "Go to Home Directory"
+        },
+        {
+            "command": "lc",
+            "alias": "to_lowercase_test",
+            "description": "Convert string to lowercase"
         }
     ]
 }

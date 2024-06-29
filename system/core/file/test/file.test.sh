@@ -2,37 +2,9 @@
 # devenv_precmd
 source $(realpath "$HOME/.devenv.sources.sh")
 
-get_file_name() {
-    echo "test.txt"
-}
-
-makefile_test_file() {
-    local file="$(get_file_name)"
-    touch "$file"
-    echo "Hello" >> "$file"
-    echo "World!" >> "$file"
-}
-
-cleanup_test_file() {
-    local file="$(get_file_name)"
-    if [[ -f "$file" ]]; then
-        rm "$file"
-    fi
-}
-
-run_all_tests() {
-    makefile_test_file
-    # Get all functions starting with 'test_'
-    for func in $(declare -F | awk '{print $3}' | grep -E '^test_'); do
-        # Call the function
-        $func
-    done
-    cleanup_test_file
-}
-
 test_file_count_text() {
     log_info "Testing 'file_count_text' function"
-    local file="$(get_file_name)"
+    local file="$1"
     local result=$(file_count_text "$file")
     local expected="2"
 
@@ -47,7 +19,7 @@ test_file_count_text() {
 
 test_file_show_text() {
     log_info "Testing 'file_show_text' function"
-    local file="$(get_file_name)"
+    local file="$1"
     local temp_file=$(mktemp)
     local temp_file2=$(mktemp)
     
@@ -67,7 +39,54 @@ test_file_show_text() {
 
     rm "$temp_file"
     rm "$temp_file2"
+    echo "====="
 }
 
+test_file_search_text() {
+    log_info "Testing 'file_search_text' function"
+    local file="$1"
+    local search="World!"
+    
+    file_search_text "$file" "$search"
+    echo "File: $file"
+    echo "Search: $search"
+    echo "File Content:"
+    cat "$file"
 
-run_all_tests
+    [ $? -eq 0 ] && log_success "Status: Passed" || log_error "Status: Failed"
+    echo "====="
+}
+
+# ===========================================
+# run_all_tests
+# ===========================================
+
+tmp_file_name="test.txt"
+tmp_folder="$(realpath "$ENV_TMP_DIR")/.others"
+tmp_file_path="$tmp_folder/$tmp_file_name"
+log_info "Creating temporary file: $tmp_file_path"
+
+# Make test file
+touch "$tmp_file_path"
+echo "Hello" >> "$tmp_file_path"
+echo "World!" >> "$tmp_file_path"
+
+this_file="$PATH_POLSKIE_SH/system/core/file/test/file.test.sh"
+if [ ! -f "$this_file" ]; then
+	echo "Error: File '$this_file' does not exist or is not readable."
+	exit 1
+fi
+
+list=($(extract_test_functions "$this_file"))
+# Get all functions starting with 'test_'
+# for commonfunc in $(declare -F | awk '{print $3}' | grep -E '^test_'); do
+for func in "${list[@]}"; do
+	# Call the function
+	$func $tmp_file_path
+done
+
+# Cleanup
+log_info "Cleaning up temporary file: $tmp_file_path"
+if [[ -f "$tmp_file_path" ]]; then
+    rm "$tmp_file_path"
+fi
