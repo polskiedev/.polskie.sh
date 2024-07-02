@@ -1,12 +1,16 @@
 #!/bin/bash
 
-make_note() {
+get_note_path() {
+    local dest_path="$HOME/notes"
+    echo "$dest_path"
+}
+
+get_note_filename() {
     # Get the current date and time in the specified format
     local timestamp=$(date +"%Y-%m-%d_%I%M%p")
     timestamp=$(date +"%Y-%m-%d")
     local filename
     local prefix
-    local dest_path="$HOME/notes"
 
     # Create the filename
     if [ -n "$1" ]; then
@@ -15,6 +19,29 @@ make_note() {
         filename="${prefix}_${timestamp}.txt"
     else
         filename="${timestamp}.txt"
+    fi
+
+    echo "$filename"
+}
+
+write_note() {
+    local dest_path="$(get_note_path)"
+    local filename="$(get_note_filename "$@")"
+
+    if ! [[ -f "$dest_path/$filename" ]]; then
+        make_note "$filename"
+    fi
+
+    # Change below based on prefered editor
+    note_editor "$dest_path/$filename"
+}
+
+make_note() {
+    local dest_path="$(get_note_path)"
+    local filename="$(get_note_filename "$@")"
+
+    if [ -n "$1" ]; then
+        filename="$1"
     fi
 
     # Ensure the destination path exists
@@ -26,8 +53,6 @@ make_note() {
     # Confirm the file has been created
     if [ $? -eq 0 ]; then
         echo "Note created: $dest_path/$filename"
-        # Change below based on prefered editor
-        note_editor "$dest_path/$filename"
     else
         echo "Failed to create note"
     fi

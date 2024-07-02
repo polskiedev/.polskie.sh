@@ -19,6 +19,11 @@
             "command": "make:note",
             "alias": "make_note",
             "description": "Make note"
+        },
+        {
+            "command": "write:note",
+            "alias": "write_note",
+            "description": "Write note"
         }
     ]
 }
