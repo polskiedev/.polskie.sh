@@ -12,8 +12,13 @@
         },
         {
             "command": "lc",
-            "alias": "to_lowercase_test",
+            "alias": "strtolower",
             "description": "Convert string to lowercase"
+        },
+        {
+            "command": "make:note",
+            "alias": "make_note",
+            "description": "Make note"
         }
     ]
 }
