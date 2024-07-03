@@ -21,7 +21,7 @@
             "description": "Make note"
         },
         {
-            "command": "write:note",
+            "command": "note",
             "alias": "write_note",
             "description": "Write note"
         }

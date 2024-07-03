@@ -60,7 +60,7 @@ make_note() {
 
 note_editor() {
     if [ -n "$1" ]; then
-        nano "$1"
+        nvim "$1"
     else
         echo "File not passed."
     fi
