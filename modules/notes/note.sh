@@ -5,17 +5,20 @@ get_note_path() {
     echo "$dest_path"
 }
 
+list_notes() {
+    echo "Notes List"
+}
+
 get_note_filename() {
     # Get the current date and time in the specified format
-    local timestamp=$(date +"%Y-%m-%d_%I%M%p")
-    timestamp=$(date +"%Y-%m-%d")
+    local timestamp="$(get_datetime --date)"
     local filename
     local prefix
 
     # Create the filename
     if [ -n "$1" ]; then
         # slugify
-        prefix=echo "$1" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/--*/-/g' -e 's/-$//' -e 's/^-//'
+        prefix="$(slugify "$1")"
         filename="${prefix}_${timestamp}.txt"
     else
         filename="${timestamp}.txt"
@@ -33,7 +36,7 @@ write_note() {
     fi
 
     # Change below based on prefered editor
-    note_editor "$dest_path/$filename"
+    psh_text_editor "$dest_path/$filename"
 }
 
 make_note() {
@@ -58,10 +61,3 @@ make_note() {
     fi
 }
 
-note_editor() {
-    if [ -n "$1" ]; then
-        nvim "$1"
-    else
-        echo "File not passed."
-    fi
-}
