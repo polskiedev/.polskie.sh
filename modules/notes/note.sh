@@ -6,7 +6,20 @@ get_note_path() {
 }
 
 list_notes() {
-    echo "Notes List"
+    local search_dir="$(get_note_path)"
+    if [[ ! -d "$search_dir" ]]; then
+        echo "Notes folder doesn't exist yet."
+        return 1
+    fi
+
+    selected_option=$(find "$search_dir" -type f -name "*.txt" | fzf)
+
+    # Check if a file was selected
+    if [[ -n "$selected_file" ]]; then
+        psh_text_editor "$selected_option"
+    else
+        echo "No file selected."
+    fi
 }
 
 get_note_filename() {

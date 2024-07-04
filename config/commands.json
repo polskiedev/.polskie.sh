@@ -1,47 +1,36 @@
 {
-    "commands": [
-        {
-            "command": "list",
-            "alias": "ls",
-            "description": "List files"
-        },
-        {
+    "commands": [{
             "command": "cd:home",
             "alias": "cd $HOME",
             "description": "Go to Home Directory"
         },
         {
-            "command": "lc",
-            "alias": "strtolower",
-            "description": "Convert string to lowercase"
-        },
-        {
-            "command": "make:note",
-            "alias": "make_note",
-            "description": "Make note"
-        },
-        {
             "command": "note",
             "alias": "write_note",
-            "description": "Write note"
+            "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
-            "command": "install:vscode.ext",
+            "command": "note:l",
+            "alias": "list_notes",
+            "description": "List of available notes"
+        },
+        {
+            "command": "vsce:i",
             "alias": ". $PATH_DEVAPPS/setup.sh install:vscode.ext",
             "description": "Install Vscode extensions"
         },
         {
-            "command": "backup:vscode.ext",
+            "command": "vsce -b",
             "alias": ". $PATH_DEVAPPS/setup.sh backup:vscode.ext",
             "description": "Backup list of Vscode extensions"
         },
         {
-            "command": "add:gitignore",
+            "command": "gitignore",
             "alias": "add_gitignore",
             "description": "Copy gitignore from git dotfiles"
         },
         {
-            "command": "open:autoload",
+            "command": "autoload",
             "alias": "open_autoload_files",
             "description": "Open autoload files for editiong"
         }
