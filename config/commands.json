@@ -33,6 +33,11 @@
             "command": "autoload",
             "alias": "open_autoload_files",
             "description": "Open autoload files for editing"
+        },
+        {
+            "command": "deploy",
+            "alias": "devenv_deploy",
+            "description": "Deploy devenv repository"
         }
     ]
 }
