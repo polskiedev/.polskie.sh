@@ -137,7 +137,7 @@ if [ "$1" = "--run" ]; then
         __polskiesh_makefile "$module_name"
     fi
 elif [ "$1" = "--init" ]; then
-	list=("system" "apps" "modules" "common")
+	list=("system" "commands" "modules" "common")
     output_dir="$PATH_POLSKIE_SH/.output"
     output_file="$output_dir/sources.sh"
     output_alias_file="$output_dir/sources.alias.sh"

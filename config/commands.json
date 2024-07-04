@@ -38,6 +38,11 @@
             "command": "deploy",
             "alias": "devenv_deploy",
             "description": "Deploy devenv repository"
+        },
+        {
+            "command": "bash",
+            "alias": "sudo chsh $user -s /bin/bash && echo 'Logout now.'",
+            "description": "Switch to bash shell"
         }
     ]
 }
