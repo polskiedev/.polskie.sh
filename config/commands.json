@@ -34,6 +34,16 @@
             "command": "backup:vscode.ext",
             "alias": ". $PATH_DEVAPPS/setup.sh backup:vscode.ext",
             "description": "Backup list of Vscode extensions"
+        },
+        {
+            "command": "add:gitignore",
+            "alias": "add_gitignore",
+            "description": "Copy gitignore from git dotfiles"
+        },
+        {
+            "command": "open:autoload",
+            "alias": "open_autoload_files",
+            "description": "Open autoload files for editiong"
         }
     ]
 }
