@@ -30,9 +30,9 @@
             "description": "Copy gitignore from git dotfiles"
         },
         {
-            "command": "autoload",
+            "command": "sf:l",
             "alias": "open_autoload_files",
-            "description": "Open autoload files for editing"
+            "description": "Open autoload files for editing. [Shell Files List]"
         },
         {
             "command": "deploy",
