@@ -20,17 +20,18 @@ dump_pathinfo_cd_list() {
 }
 
 add_cd_list() {
-	local dest_path="$(cd_list_dest_path)"
+    eval "$(get_pathinfo_cd_list)"
+
+	local dest_path="${pathinfo['destination']}"
 	local filename="cd.txt"
 	local filepath="$dest_path/$filename"
 	local type="list"
 
 	add_to_temp "$type" "$filename" "$PWD"
-	add_to_temp "$type" "$filename" "test"
 
-	echo "================="
-	echo "History: '$filepath'"
-	cat $filepath
+	# echo "================="
+	# echo "History: '$filepath'"
+	# cat $filepath
 }
 
 show_cd_list() {

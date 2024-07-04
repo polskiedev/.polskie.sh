@@ -21,18 +21,21 @@ add_to_temp() {
         return 1
 	fi
 
+	type="$1"
+	filename="$2"
+	text="$3"
+
     case "$type" in
 		"list")
 			dest_path="$ENV_TMP_DIR/$ENV_TMP_LIST"
 			;;
         *)
-            echo "add_to_temp(): Invalid parameter."
+            echo "add_to_temp(): Invalid parameter type '$type'"
              return 1
             ;;
 	esac
 
-	filename="$2"
-	text="$3"
+
 
 	filepath="$dest_path/$filename"
 

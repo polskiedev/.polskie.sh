@@ -43,6 +43,16 @@
             "command": "bash",
             "alias": "sudo chsh $user -s /bin/bash && echo 'Logout now.'",
             "description": "Switch to bash shell"
+        },
+        {
+            "command": "cd:a",
+            "alias": "add_cd_list",
+            "description": "Add current directory to cd list"
+        },
+        {
+            "command": "cd:l",
+            "alias": "show_cd_list",
+            "description": "Go to a directory in cd list"
         }
     ]
 }
