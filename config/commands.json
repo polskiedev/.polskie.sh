@@ -20,7 +20,7 @@
             "description": "Install Vscode extensions"
         },
         {
-            "command": "vsce -b",
+            "command": "vsce:bak",
             "alias": ". $PATH_DEVAPPS/setup.sh backup:vscode.ext",
             "description": "Backup list of Vscode extensions"
         },
@@ -32,7 +32,7 @@
         {
             "command": "autoload",
             "alias": "open_autoload_files",
-            "description": "Open autoload files for editiong"
+            "description": "Open autoload files for editing"
         }
     ]
 }

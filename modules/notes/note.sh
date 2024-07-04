@@ -12,10 +12,10 @@ list_notes() {
         return 1
     fi
 
-    selected_option=$(find "$search_dir" -type f -name "*.txt" | fzf)
+    selected_option=$(find "$search_dir" -type f -name "*.txt" | fzf --prompt="Open note file: ")
 
     # Check if a file was selected
-    if [[ -n "$selected_file" ]]; then
+    if [[ -n "$selected_option" ]]; then
         psh_text_editor "$selected_option"
     else
         echo "No file selected."
