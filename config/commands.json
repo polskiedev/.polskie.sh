@@ -24,6 +24,16 @@
             "command": "note",
             "alias": "write_note",
             "description": "Write note"
+        },
+        {
+            "command": "install:vscode.ext",
+            "alias": ". $PATH_DEVAPPS/setup.sh install:vscode.ext",
+            "description": "Install Vscode extensions"
+        },
+        {
+            "command": "backup:vscode.ext",
+            "alias": ". $PATH_DEVAPPS/setup.sh backup:vscode.ext",
+            "description": "Backup list of Vscode extensions"
         }
     ]
 }
