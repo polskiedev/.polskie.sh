@@ -50,13 +50,19 @@
         },
         {
             "command": "cd:a",
-            "alias": "add_cd_list",
+            "alias": "add_to_list_override_command_cd",
             "group": "Change Directory",
             "description": "Add current directory to cd list"
         },
         {
             "command": "cd:l",
-            "alias": "show_cd_list",
+            "alias": "go_to_list_override_command_cd",
+            "group": "Change Directory",
+            "description": "Go to a directory in cd list"
+        },
+        {
+            "command": "cd",
+            "alias": "override_command_cd",
             "group": "Change Directory",
             "description": "Go to a directory in cd list"
         }
