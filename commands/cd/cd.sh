@@ -54,3 +54,30 @@ show_cd_list() {
         echo "No directory selected."
     fi
 }
+
+override_change_directory() {
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("psh")
+    local args=("$@")
+
+	IFS=','; joined_string="${args[*]}"; unset IFS
+	echo "Passed Arguments: ($joined_string)"
+
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+
+    if [[ "${result["psh"]}" = true ]]; then
+        echo "override"
+    else
+        echo "process command"
+    fi
+    # echo "Request Parameters:"
+    # for key in "${!result[@]}"; do
+    #     echo "$key: ${result[$key]}"
+    # done
+
+    # echo "Remaining Parameters:"
+    # for param in "${remaining_parameters[@]}"; do
+    #     echo "$param"
+    # done
+}

@@ -1,57 +1,63 @@
 {
-    "commands": [{
-            "command": "cd:home",
-            "alias": "cd $HOME",
-            "description": "Go to Home Directory"
+    "commands": [
+        {
+            "command": "deploy",
+            "alias": "devenv_deploy",
+            "group": "DevEnv",
+            "description": "Deploy devenv repository"
         },
         {
             "command": "note",
             "alias": "write_note",
+            "group": "Notes",
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
             "command": "note:l",
             "alias": "list_notes",
+            "group": "Notes",
             "description": "List of available notes"
         },
         {
             "command": "vsce:i",
             "alias": ". $PATH_DEVAPPS/setup.sh install:vscode.ext",
+            "group": "VSCode Extensions",
             "description": "Install Vscode extensions"
         },
         {
             "command": "vsce:bak",
             "alias": ". $PATH_DEVAPPS/setup.sh backup:vscode.ext",
+            "group": "VSCode Extensions",
             "description": "Backup list of Vscode extensions"
         },
         {
             "command": "gitignore",
             "alias": "add_gitignore",
+            "group": "git",
             "description": "Copy gitignore from git dotfiles"
         },
         {
             "command": "sf:l",
             "alias": "open_autoload_files",
+            "group": "Shell: Files",
             "description": "Open autoload files for editing. [Shell Files List]"
-        },
-        {
-            "command": "deploy",
-            "alias": "devenv_deploy",
-            "description": "Deploy devenv repository"
         },
         {
             "command": "bash",
             "alias": "sudo chsh $user -s /bin/bash && echo 'Logout now.'",
+            "group": "Shell: Switch",
             "description": "Switch to bash shell"
         },
         {
             "command": "cd:a",
             "alias": "add_cd_list",
+            "group": "Change Directory",
             "description": "Add current directory to cd list"
         },
         {
             "command": "cd:l",
             "alias": "show_cd_list",
+            "group": "Change Directory",
             "description": "Go to a directory in cd list"
         }
     ]
