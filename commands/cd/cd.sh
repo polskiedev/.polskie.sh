@@ -112,11 +112,16 @@ override_command_cd() {
     fi
 
     if [[ "${result["psh"]}" = true ]]; then
-        echo "override"
+        go_to_list_override_command_cd "${remaining_parameters[@]}"
     # elif [ $count -eq 0 ]; then
     #     echo "cd: No arguments passed."
     else
+        # echo "Remaining Parameters:"
+        # for param in "${remaining_parameters[@]}"; do
+        #     echo "$param"
+        # done
+        
         # Just pass it all to cd
-        command cd "$@"
+        command cd "${remaining_parameters[@]}"
     fi
 }

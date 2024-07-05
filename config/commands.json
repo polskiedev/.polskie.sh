@@ -13,19 +13,22 @@
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
-            "command": "note:l",
+            "command": "note:list",
+            "alt_command": "note:l",
             "alias": "list_notes",
             "group": "Notes",
             "description": "List of available notes"
         },
         {
-            "command": "vsce:i",
+            "command": "vsce:install",
+            "alt_command": "vsce:i",
             "alias": ". $PATH_DEVAPPS/setup.sh install:vscode.ext",
             "group": "VSCode Extensions",
             "description": "Install Vscode extensions"
         },
         {
-            "command": "vsce:bak",
+            "command": "vsce:backup",
+            "alt_command": "vsce:bak",
             "alias": ". $PATH_DEVAPPS/setup.sh backup:vscode.ext",
             "group": "VSCode Extensions",
             "description": "Backup list of Vscode extensions"
@@ -49,13 +52,15 @@
             "description": "Switch to bash shell"
         },
         {
-            "command": "cd:a",
+            "command": "cd:add",
+            "alt_command": "cd:a",
             "alias": "add_to_list_override_command_cd",
             "group": "Change Directory",
             "description": "Add current directory to cd list"
         },
         {
-            "command": "cd:l",
+            "command": "cd:list",
+            "alt_command": "cd:l",
             "alias": "go_to_list_override_command_cd",
             "group": "Change Directory",
             "description": "Go to a directory in cd list"
