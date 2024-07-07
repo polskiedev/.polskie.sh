@@ -230,7 +230,6 @@ add_override_command_git() {
 		read -p "Enter commit message? " commit_msg
 		commit_override_command_git	"$commit_msg"
 	fi
-
 }
 
 commit_override_command_git() {
