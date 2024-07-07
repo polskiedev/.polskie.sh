@@ -257,8 +257,8 @@ commit_override_command_git() {
 				;;
 			[Nn]|[Nn][Oo])
 				echo "No problem!"
-				break
 				return 1
+				break
 				;;
 			*)
 				echo "Please enter yes or no."
@@ -276,8 +276,8 @@ commit_override_command_git() {
 				;;
 			[Nn]|[Nn][Oo])
 				echo "No problem!"
-				break
 				return 1
+				break
 				;;
 			*)
 				echo "Please enter yes or no."
