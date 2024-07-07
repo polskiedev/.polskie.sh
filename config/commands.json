@@ -7,17 +7,25 @@
             "description": "Deploy devenv repository"
         },
         {
-            "command": "note",
-            "alias": "write_note",
+            "command": "note:create",
+            "alt_command": "note",
+            "alias": "open_note",
             "group": "Notes",
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
             "command": "note:list",
             "alt_command": "note:l",
-            "alias": "list_notes",
+            "alias": "list_notes --action:open",
             "group": "Notes",
-            "description": "List of available notes"
+            "description": "List of available notes, chose what to open"
+        },
+        {
+            "command": "note:delete",
+            "alt_command": "note:d",
+            "alias": "list_notes --action:delete",
+            "group": "Notes",
+            "description": "Delete a chosen note"
         },
         {
             "command": "vsce:install",
