@@ -78,20 +78,20 @@ override_command_git() {
 }
 
 status_override_command_git() {
+	log_info "status_override_command_git()"
 	local repo_name=""
 	local branch_name=""
 
-	echo "status_override_command_git()"
     if ! repo_name=$(get_git_repo_name); then
-        echo "Current directory is not in any git repository."
+        log_error "Current directory is not in any git repository."
 		return 1
     else
-        echo "Repository: '$repo_name'"
+        log_info "Repository: '$repo_name'"
     fi
 
 	branch_name="$(git branch --show-current)"
 
-	echo "Branch: '$branch_name'"
+	log_info "Branch: '$branch_name'"
 	git status
 }
 
