@@ -97,6 +97,31 @@ status_override_command_git() {
 
 add_override_command_git() {
 	echo "status_override_command_git()"
+
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("showdata")
+    local args=("$@")
+
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+
+    count=${#remaining_parameters[@]}
+
+    if [[ "${result["showdata"]}" = true ]]; then
+        IFS=','; joined_string="${args[*]}"; unset IFS
+        echo "Passed Arguments: ($joined_string)"
+
+        echo "Request Parameters:"
+        for key in "${!result[@]}"; do
+            echo "$key: ${result[$key]}"
+        done
+
+        echo "Remaining Parameters:"
+        for param in "${remaining_parameters[@]}"; do
+            echo "$param"
+        done
+    fi
+
 	local repo_name=""
 	local branch_name=""
 
@@ -108,76 +133,97 @@ add_override_command_git() {
     fi
 
 	branch_name="$(git branch --show-current)"
+	echo "Branch Name: '$branch_name'"
 
-	local counter=1
-	# Sort by status, then by path_name
-	local git_status=$(git status --porcelain | sort -k1,1 -k2 -r)
-	local formatted_files=()
-    # Process each line of git status output
-    while IFS= read -r line; do
-        # Extract status and file path
-        local status="${line:0:2}"
-        local file="${line:3}"
+	local git_add_all=false
+	for param in "${remaining_parameters[@]}"; do
+		if [ "$param" = "." ]; then
+			git_add_all=true
+		fi
+	done
 
-        # Print status and file in the required format
-        formatted_file="$counter|${status}| ${file}"
-        formatted_files+=("$formatted_file")
-		((counter++))
-    done <<< "$git_status"
+	local git_added=0
+	if [[ "$git_add_all" = true ]]; then
+		git_added=1
+		log_info "Adding all changes to git"
+		git add .
+	else
+		local counter=1
+		# Sort by status, then by path_name
+		local git_status=$(git status --porcelain | sort -k1,1 -k2 -r)
+		local formatted_files=()
+		# Process each line of git status output
+		while IFS= read -r line; do
+			# Extract status and file path
+			local status="${line:0:2}"
+			local file="${line:3}"
 
-    local preview='file="$(echo "{}" | \
-						tr -d "###" | \
-						cut -d"|" -f3 | \
-						sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")"; \
-                    echo "File: $file"; \
-                    echo "================================="; \
-                    cat "$file"'
-	preview=$(echo "$preview" | sed -e "s/###/'/g")
+			# Print status and file in the required format
+			formatted_file="$counter|${status}| ${file}"
+			formatted_files+=("$formatted_file")
+			((counter++))
+		done <<< "$git_status"
 
-	local header=("Repository: '$repo_name'" \
-		"Branch: '$branch_name'" \
-		"-------------------" \
-		"Use [tab] key to select" \
-	)
+		local preview='file="$(echo "{}" | \
+							tr -d "###" | \
+							cut -d"|" -f3 | \
+							sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")"; \
+						echo "File: $file"; \
+						echo "================================="; \
+						cat "$file"'
+		preview=$(echo "$preview" | sed -e "s/###/'/g")
 
-	header=$(printf '%s\n' "${header[@]}")
+		local header=("Repository: '$repo_name'" \
+			"Branch: '$branch_name'" \
+			"-------------------" \
+			"Use [tab] key to select" \
+		)
 
-	local prompt="Choose files you want to add: "
-	local selected_options=$(printf '%s\n' "${formatted_files[@]}" | \
-                fzf \
-                --prompt="$prompt" \
-                --preview-window='right:50%:wrap'\
-				--preview="$preview" \
-                --multi \
-				--header="$header"\
-            )
-	local option_count=$(echo "$selected_options" | wc -l)
+		header=$(printf '%s\n' "${header[@]}")
 
-	while IFS= read -r option; do
-		local filename="$(echo "$option" | cut -d"|" -f3)"
-		filename="$(trim "$filename")"
-		echo "Added '$filename' to git"
-		git add "$filename"
-	done <<< "$selected_options"
+		local prompt="Choose files you want to add: "
+		local selected_options=$(printf '%s\n' "${formatted_files[@]}" | \
+					fzf \
+					--prompt="$prompt" \
+					--preview-window='right:50%:wrap'\
+					--preview="$preview" \
+					--multi \
+					--header="$header"\
+				)
+		local option_count=$(echo "$selected_options" | wc -l)
+
+		while IFS= read -r option; do
+			local filename="$(echo "$option" | cut -d"|" -f3)"
+			filename="$(trim "$filename")"
+
+			if [ -n "$filename" ]; then
+				echo "Added '$filename' to git"
+				git add "$filename"
+				((git_added++))
+			fi
+		done <<< "$selected_options"
+	fi
 
 	local commit_now=false
- 	while true; do
-        local answer
-        read -p "Do you want to commit changes? (y/n) " answer
-        case "$answer" in
-            [Yy]|[Yy][Ee][Ss])
-				commit_now=true
-                break
-                ;;
-            [Nn]|[Nn][Oo])
-                echo "No problem!"
-                break
-                ;;
-            *)
-                echo "Please enter yes or no."
-                ;;
-        esac
-    done
+	if [ $git_added -gt 0 ]; then
+		while true; do
+			local answer
+			read -p "Do you want to commit changes? (y/n) " answer
+			case "$answer" in
+				[Yy]|[Yy][Ee][Ss])
+					commit_now=true
+					break
+					;;
+				[Nn]|[Nn][Oo])
+					echo "No problem!"
+					break
+					;;
+				*)
+					echo "Please enter yes or no."
+					;;
+			esac
+		done
+	fi
 
 	if [[ "$commit_now" = true ]]; then
 		local commit_msg
