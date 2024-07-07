@@ -83,7 +83,14 @@ list_notes() {
         ((counter++))
     done
 
-    local preview='echo "--- Preview ---"; file=$(echo "{}" | tr -d "###" | cut -d "|" -f2); cat "$search_dir/${file}.txt" | head -n 10'
+    local preview='echo "--- Preview ---"; \
+                    file=$(echo "{}" | \
+                        tr -d "###" | \
+                        cut -d "|" -f2\
+                    ); \
+                    cat "$search_dir/${file}.txt" | \
+                    head -n 10'
+
     preview=$(echo "$preview" | sed -e "s/\$search_dir/$formatted_search_dir/g")
     preview=$(echo "$preview" | sed -e "s/###/'/g")
 
@@ -119,7 +126,11 @@ list_notes() {
             "delete")
                 # Todo: Ask for confirmation before deleting
                 local option_count=$(echo "$selected_options" | wc -l)
-                read -p "Are you sure you want to delete '$option_count' files? [y/N] " answer
+                echo "--- $option_count files for deletion ---"
+                echo "$selected_options" | \
+                    awk -F'|' -v search_dir="$search_dir" '{print search_dir "/" $2 ".txt"}' | \
+                    nl -w2 -s'. '
+                read -p "Are you sure you want to delete files above? [y/N] " answer
                 case "$answer" in
                     [yY])
                         while IFS= read -r option; do
