@@ -18,40 +18,48 @@ pathinfo_override_command_git() {
 	local format_ticket="${pathinfo['format_ticket']}"
 	local ticket_max="${pathinfo['ticket_max']}"
 
-	local default_file_format_ticket="${settings_dir}/${default_file}${format_ticket}.txt"
-	local file_format_ticket="${settings_dir}/${repo_name}${format_ticket}.txt"
+	local default_file_format_ticket="${default_file}${format_ticket}.txt"
+	local default_file_ticket_prefix="${default_file}${ticket_prefix}.txt"
+	local default_file_ticket_max="${default_file}${ticket_max}.txt"
 
-	local default_file_ticket_prefix="${settings_dir}/${default_file}${ticket_prefix}.txt"
-	local file_ticket_prefix="${settings_dir}/${repo_name}${ticket_prefix}.txt"
-
-	local default_file_ticket_max="${settings_dir}/${default_file}${ticket_max}.txt"
-	local file_ticket_max="${settings_dir}/${repo_name}${ticket_max}.txt"
+	local file_format_ticket="${repo_name}${format_ticket}.txt"
+	local file_ticket_prefix="${repo_name}${ticket_prefix}.txt"
+	local file_ticket_max="${repo_name}${ticket_max}.txt"
 
 	local ticket_format=""
 	local ticket_prefix_txt=""
 	local ticket_max_num=0
 
-	if [ -f "$file_format_ticket" ]; then
-		ticket_format=$(head -n 1 "$file_format_ticket")
-	elif [ -f "$default_file_format_ticket" ]; then
-		ticket_format=$(head -n 1 "$default_file_format_ticket")
+	if [ -f "${settings_dir}/${file_format_ticket}" ]; then
+		ticket_format=$(head -n 1 "${settings_dir}/${file_format_ticket}")
+	elif [ -f "${settings_dir}/${default_file_format_ticket}" ]; then
+		ticket_format=$(head -n 1 "${settings_dir}/${default_file_format_ticket}")
 	fi
 
-	if [ -f "$file_ticket_prefix" ]; then
-		ticket_prefix_txt=$(head -n 1 "$file_ticket_prefix")
-	elif [ -f "$default_file_ticket_prefix" ]; then
-		ticket_prefix_txt=$(head -n 1 "$default_file_ticket_prefix")
+	if [ -f "${settings_dir}/${file_ticket_prefix}" ]; then
+		ticket_prefix_txt=$(head -n 1 "${settings_dir}/${file_ticket_prefix}")
+	elif [ -f "${settings_dir}/${default_file_ticket_prefix}" ]; then
+		ticket_prefix_txt=$(head -n 1 "${settings_dir}/${default_file_ticket_prefix}")
 	fi
 
-	if [ -f "$file_ticket_max" ]; then
-		ticket_max_num=$(head -n 1 "$file_ticket_max")
-	elif [ -f "$default_file_ticket_max" ]; then
-		ticket_max_num=$(head -n 1 "$default_file_ticket_max")
+	if [ -f "${settings_dir}/${file_ticket_max}" ]; then
+		ticket_max_num=$(head -n 1 "${settings_dir}/${file_ticket_max}")
+	elif [ -f "${settings_dir}/${default_file_ticket_max}" ]; then
+		ticket_max_num=$(head -n 1 "${settings_dir}/${default_file_ticket_max}")
 	fi
 
 	pathinfo["ticket_format"]="$ticket_format"
 	pathinfo["ticket_prefix_txt"]="$ticket_prefix_txt"
 	pathinfo["ticket_max_num"]=$ticket_max_num
+	pathinfo["repository"]=$repo_name
+
+	pathinfo["default_file_format_ticket"]=$default_file_format_ticket
+	pathinfo["default_file_ticket_prefix"]=$default_file_ticket_prefix
+	pathinfo["default_file_ticket_max"]=$default_file_ticket_max
+
+	pathinfo["file_format_ticket"]=$file_format_ticket
+	pathinfo["file_ticket_prefix"]=$file_ticket_prefix
+	pathinfo["file_ticket_max"]=$file_ticket_max
 
     # Return associative array
     echo "$(declare -p pathinfo)"
@@ -344,4 +352,21 @@ commit_override_command_git() {
 				;;
 		esac
 	done
+}
+
+add_default_setting_override_command_git() {
+	echo "add_default_setting_override_command_git()"
+	eval "$(pathinfo_override_command_git)"
+
+	local type="settings"
+	local settings_dir="${pathinfo['settings_dir']}"
+	local format_ticket="${pathinfo['default_file_format_ticket']}"
+	local ticket_prefix="${pathinfo['default_file_ticket_prefix']}"
+	local ticket_max="${pathinfo['default_file_ticket_max']}"
+
+	cleanup_override_command_git
+
+	add_to_temp "$type" "$format_ticket" "[[:alnum:]]{3,}-[0-9]{6}"
+	add_to_temp "$type" "$ticket_prefix" "DEV"
+	add_to_temp "$type" "$ticket_max" "6"
 }
