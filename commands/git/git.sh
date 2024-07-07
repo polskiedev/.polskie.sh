@@ -7,6 +7,51 @@ pathinfo_override_command_git() {
     pathinfo["default_file"]="default"
 	pathinfo["format_ticket"]=".format_ticket"
 	pathinfo["ticket_prefix"]=".ticket_prefix"
+	pathinfo["ticket_max"]=".ticket_max"
+	
+	local repo_name=$(get_git_repo_name)
+
+	local default_file="${pathinfo['default_file']}"
+	local settings_dir="${pathinfo['settings_dir']}"
+
+	local ticket_prefix="${pathinfo['ticket_prefix']}"
+	local format_ticket="${pathinfo['format_ticket']}"
+	local ticket_max="${pathinfo['ticket_max']}"
+
+	local default_file_format_ticket="${settings_dir}/${default_file}${format_ticket}.txt"
+	local file_format_ticket="${settings_dir}/${repo_name}${format_ticket}.txt"
+
+	local default_file_ticket_prefix="${settings_dir}/${default_file}${ticket_prefix}.txt"
+	local file_ticket_prefix="${settings_dir}/${repo_name}${ticket_prefix}.txt"
+
+	local default_file_ticket_max="${settings_dir}/${default_file}${ticket_max}.txt"
+	local file_ticket_max="${settings_dir}/${repo_name}${ticket_max}.txt"
+
+	local ticket_format=""
+	local ticket_prefix_txt=""
+	local ticket_max_num=0
+
+	if [ -f "$file_format_ticket" ]; then
+		ticket_format=$(head -n 1 "$file_format_ticket")
+	elif [ -f "$default_file_format_ticket" ]; then
+		ticket_format=$(head -n 1 "$default_file_format_ticket")
+	fi
+
+	if [ -f "$file_ticket_prefix" ]; then
+		ticket_prefix_txt=$(head -n 1 "$file_ticket_prefix")
+	elif [ -f "$default_file_ticket_prefix" ]; then
+		ticket_prefix_txt=$(head -n 1 "$default_file_ticket_prefix")
+	fi
+
+	if [ -f "$file_ticket_max" ]; then
+		ticket_max_num=$(head -n 1 "$file_ticket_max")
+	elif [ -f "$default_file_ticket_max" ]; then
+		ticket_max_num=$(head -n 1 "$default_file_ticket_max")
+	fi
+
+	pathinfo["ticket_format"]="$ticket_format"
+	pathinfo["ticket_prefix_txt"]="$ticket_prefix_txt"
+	pathinfo["ticket_max_num"]=$ticket_max_num
 
     # Return associative array
     echo "$(declare -p pathinfo)"
@@ -110,25 +155,27 @@ add_override_command_git() {
 
 	while IFS= read -r option; do
 		local filename="$(echo "$option" | cut -d"|" -f3)"
-		git add "$(trim "$filename")"
+		filename="$(trim "$filename")"
+		echo "Added '$filename' to git"
+		git add "$filename"
 	done <<< "$selected_options"
 
- 	while true; do
-        local answer
-        read -p "Do you want to commit changes? (y/n) " answer
-        case "$answer" in
-            [Yy]|[Yy][Ee][Ss])
-                break
-                ;;
-            [Nn]|[Nn][Oo])
-                echo "No problem!"
-                break
-                ;;
-            *)
-                echo "Please enter yes or no."
-                ;;
-        esac
-    done
+ 	# while true; do
+    #     local answer
+    #     read -p "Do you want to commit changes? (y/n) " answer
+    #     case "$answer" in
+    #         [Yy]|[Yy][Ee][Ss])
+    #             break
+    #             ;;
+    #         [Nn]|[Nn][Oo])
+    #             echo "No problem!"
+    #             break
+    #             ;;
+    #         *)
+    #             echo "Please enter yes or no."
+    #             ;;
+    #     esac
+    # done
 }
 
 commit_override_command_git() {
@@ -138,6 +185,8 @@ commit_override_command_git() {
 
 	local repo_name=""
 	local current_branch=""
+	local all_params="$*"
+	local msg="$(echo "$all_params")"
 
     if ! repo_name=$(get_git_repo_name); then
         echo "Current directory is not in any git repository."
@@ -147,7 +196,7 @@ commit_override_command_git() {
     fi
 
 	current_branch=$(git branch --show-current)
-	echo "Current Branch: $current_branch"
+	echo "Current Branch: '$current_branch'"
 	# branch_name="$(git branch --show-current)"
 
 	local default_file="${pathinfo['default_file']}"
@@ -155,32 +204,86 @@ commit_override_command_git() {
 
 	local ticket_prefix="${pathinfo['ticket_prefix']}"
 	local format_ticket="${pathinfo['format_ticket']}"
+	local ticket_max="${pathinfo['ticket_max']}"
 
-	local default_file_format_ticket="${settings_dir}/${default_file}${format_ticket}.txt"
-	local file_format_ticket="${settings_dir}/${repo_name}${format_ticket}.txt"
+	local ticket_format="${pathinfo['ticket_format']}"
+	local ticket_prefix_txt="${pathinfo['ticket_prefix_txt']}"
+	local ticket_max_num="${pathinfo['ticket_max_num']}"
 
-	local default_file_ticket_prefix="${settings_dir}/${default_file}${ticket_prefix}.txt"
-	local file_ticket_prefix="${settings_dir}/${repo_name}${ticket_prefix}.txt"
+	local new_ticket_no=""
 
-	local regex=""
-	local ticket_prefix_txt=""
-
-	if [ -f "$file_format_ticket" ]; then
-		regex=$(head -n 1 "$file_format_ticket")
-	elif [ -f "$default_file_format_ticket" ]; then
-		regex=$(head -n 1 "$default_file_format_ticket")
+	local current_ticket_no=$(echo "$current_branch" | \
+		awk -F'/' '{print $NF}' | \
+		grep -oE "$ticket_format")
+    if [ -n "$current_ticket_no" ]; then
+        # msg="$current_ticket_no: $(capitalize_first_letter "$all_params")"
+		echo "Good ticket number: $current_ticket_no"
+	else
+		local pad_length=$((ticket_max_num - 1))
+		local default_ticket_no=1
+		new_ticket_no="${ticket_prefix_txt}-$(str_pad "" $pad_length "0")${default_ticket_no}"
 	fi
 
-	if [ -f "$file_ticket_prefix" ]; then
-		ticket_prefix_txt=$(head -n 1 "$file_ticket_prefix")
-	elif [ -f "$default_file_ticket_prefix" ]; then
-		ticket_prefix_txt=$(head -n 1 "$default_file_ticket_prefix")
-	fi
+	while true; do
+		local answer
+		local formatted_answer
+		read -p "Enter ticker number (default: $new_ticket_no): " answer
 
-	echo "$regex - $ticket_prefix_txt"
+		formatted_answer=$(echo "$answer" | \
+			awk -F'/' '{print $NF}' | \
+			grep -oE "$ticket_format")
+			
+		if [ -z "$answer" ]; then
+			current_ticket_no="$new_ticket_no"
+			break
+		elif [ -n "$formatted_answer" ]; then
+			current_ticket_no="$formatted_answer"
+			break
+		else
+			echo "'$answer' doesn't match with the required ticket pattern."
+		fi
+	done
 
-	local current_ticket_no=$(echo "$current_branch" | grep -oE "/$regex" | sed 's/^\/\(\w\+\)/\1/')
-	local current_ticket_no2=$(echo "$current_branch" | grep -oE "$regex" | sed 's/^\/\(\w\+\)/\1/')
+	while true; do
+		local commit_now
+		msg="${current_ticket_no}: $(ucfirst "$msg")"
+		read -p "Are you okay with this commit message \"$msg\"? (y/n) " commit_now
+
+        case "$commit_now" in
+            [Yy]|[Yy][Ee][Ss])
+                echo "git commit -m \"$msg\""
+                git commit -m "$msg"
+				break
+				;;
+			[Nn]|[Nn][Oo])
+				echo "No problem!"
+				break
+				return 1
+				;;
+			*)
+				echo "Please enter yes or no."
+				;;
+		esac
+	done
+
+	while true; do
+		local push_now
+		read -p "Do you want to push changes you've made? (y/n) " push_now
+		case "$push_now" in
+			[Yy]|[Yy][Ee][Ss])
+				git push origin HEAD 
+				break
+				;;
+			[Nn]|[Nn][Oo])
+				echo "No problem!"
+				break
+				return 1
+				;;
+			*)
+				echo "Please enter yes or no."
+				;;
+		esac
+	done
 
 	# add_to_temp "settings" "${default_file}" "DEV"
 	# add_to_temp "settings" "${file}" "PSH"
