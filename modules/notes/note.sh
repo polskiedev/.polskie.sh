@@ -66,13 +66,14 @@ list_notes() {
         local date_format="+%A, %B %-d '%y"
         local formatted_date_txt=""
         
-        # Check if the year is the current year
+        # Check if the year is the current year, don't show if current year
         if [ "$(date -d "$formatted_date" "+%Y")" -eq "$current_year" ]; then
             date_format="+%A, %B %-d"
         fi
 
         formatted_date_txt=$(date -d "$formatted_date" "$date_format")
 
+        # Show today
         if [ "$formatted_date" == "$current_date" ]; then
             formatted_date_txt="$formatted_date_txt (Today)"
         fi
@@ -126,6 +127,7 @@ list_notes() {
             "delete")
                 # Todo: Ask for confirmation before deleting
                 local option_count=$(echo "$selected_options" | wc -l)
+                local answer
                 echo "--- $option_count files for deletion ---"
                 echo "$selected_options" | \
                     awk -F'|' -v search_dir="$search_dir" '{print search_dir "/" $2 ".txt"}' | \

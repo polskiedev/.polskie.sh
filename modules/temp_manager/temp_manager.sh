@@ -29,13 +29,14 @@ add_to_temp() {
 		"list")
 			dest_path="$ENV_TMP_DIR/$ENV_TMP_LIST"
 			;;
+		"settings")
+			dest_path="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
+			;;
         *)
             echo "add_to_temp(): Invalid parameter type '$type'"
              return 1
             ;;
 	esac
-
-
 
 	filepath="$dest_path/$filename"
 

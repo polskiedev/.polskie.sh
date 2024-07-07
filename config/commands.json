@@ -48,13 +48,13 @@
             "description": "Copy gitignore from git dotfiles"
         },
         {
-            "command": "sf:l",
+            "command": "rc",
             "alias": "open_autoload_files",
             "group": "Shell: Files",
-            "description": "Open autoload files for editing. [Shell Files List]"
+            "description": "Open autoload files for editing. [Run Command Files List]"
         },
         {
-            "command": "bash",
+            "command": "to:bash",
             "alias": "sudo chsh $user -s /bin/bash && echo 'Logout now.'",
             "group": "Shell: Switch",
             "description": "Switch to bash shell"
@@ -78,6 +78,62 @@
             "alias": "override_command_cd",
             "group": "Change Directory",
             "description": "Go to a directory in cd list"
+        },
+        {
+            "command": "g:add",
+            "alt_command": "ga",
+            "alias": "git add",
+            "group": "git",
+            "description": "Git add"
+        },
+        {
+            "command": "g:commit",
+            "alt_command": "gc",
+            "alias": "git commit -m",
+            "group": "git",
+            "description": "Git commit"
+        },
+        {
+            "command": "g:checkout",
+            "alt_command": "gco",
+            "alias": "git checkout",
+            "group": "git",
+            "description": "Git checkout"
+        },
+        {
+            "command": "g:fp",
+            "alt_command": "gfp",
+            "alias": "git fetch; git pull",
+            "group": "git",
+            "description": "Git fetch and git pull"
+        },
+        {
+            "command": "g:log",
+            "alt_command": "gl",
+            "alias": "git log --all --graph --format=oneline -n 10",
+            "group": "git",
+            "description": "Git log, 10 lines only"
+        },
+        {
+            "command": "g:status",
+            "alt_command": "gs",
+            "alias": "git status",
+            "group": "git",
+            "description": "Git status"
+        },
+        {
+            "command": "g:rh",
+            "alt_command": "grh",
+            "alias": "git reset --hard",
+            "group": "git",
+            "description": "Git reset hard"
+        },
+        {
+            "command": "g:push",
+            "alt_command": "gpush",
+            "alias": "git push origin HEAD",
+            "group": "git",
+            "description": "Git push to origin head"
         }
     ]
 }
