@@ -91,7 +91,7 @@ status_override_command_git() {
 
 	branch_name="$(git branch --show-current)"
 
-	echo "Branch: $branch_name"
+	echo "Branch: '$branch_name'"
 	git status
 }
 
@@ -210,6 +210,8 @@ commit_override_command_git() {
 	local ticket_prefix_txt="${pathinfo['ticket_prefix_txt']}"
 	local ticket_max_num="${pathinfo['ticket_max_num']}"
 
+	cleanup_override_command_git
+
 	local new_ticket_no=""
 
 	local current_ticket_no=$(echo "$current_branch" | \
@@ -284,16 +286,4 @@ commit_override_command_git() {
 				;;
 		esac
 	done
-
-	# add_to_temp "settings" "${default_file}" "DEV"
-	# add_to_temp "settings" "${file}" "PSH"
-	# echo "${settings_dir}/${default_file}"
-	# echo "${settings_dir}/${file}"
-	echo "$current_ticket_no - $current_ticket_no2"
-}
-
-temp_setup_override_command_git() {
-	return 1
-	# Temp only, dont run
-	# eval "$(pathinfo_override_command_git)"
 }

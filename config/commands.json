@@ -82,14 +82,14 @@
         {
             "command": "g:add",
             "alt_command": "ga",
-            "alias": "git add",
+            "alias": "add_override_command_git",
             "group": "git",
             "description": "Git add"
         },
         {
             "command": "g:commit",
             "alt_command": "gc",
-            "alias": "git commit -m",
+            "alias": "commit_override_command_git",
             "group": "git",
             "description": "Git commit"
         },
@@ -117,7 +117,7 @@
         {
             "command": "g:status",
             "alt_command": "gs",
-            "alias": "git status",
+            "alias": "status_override_command_git",
             "group": "git",
             "description": "Git status"
         },
