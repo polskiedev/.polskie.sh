@@ -118,12 +118,21 @@ list_notes() {
                 ;;
             "delete")
                 # Todo: Ask for confirmation before deleting
-                while IFS= read -r option; do
-                    filename="$(echo "$option" | cut -d"|" -f2).txt"
-                    echo "Deleting '$search_dir/$filename'..."
-                    rm "$search_dir/$filename"
-                done <<< "$selected_options"
-                ;;
+                local option_count=$(echo "$selected_options" | wc -l)
+                read -p "Are you sure you want to delete '$option_count' files? [y/N] " answer
+                case "$answer" in
+                    [yY])
+                        while IFS= read -r option; do
+                            filename="$(echo "$option" | cut -d"|" -f2).txt"
+                            echo "Deleting '$search_dir/$filename'..."
+                            rm "$search_dir/$filename"
+                        done <<< "$selected_options"
+                        ;;
+                    *)
+                        echo "Note deletion canceled."
+                        ;;
+                esac
+            ;;
         esac
     else
         echo "No file selected."

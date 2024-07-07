@@ -72,6 +72,8 @@ go_to_list_override_command_cd() {
 
     local filepath="$dest_path/$filename"
 
+    echo "Listing from '$filepath'"
+
     # Use fzf to select a directory from the list
     selected_dir=$(fzf  --prompt="Go to what directory? " < "$filepath")
 
