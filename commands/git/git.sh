@@ -160,22 +160,31 @@ add_override_command_git() {
 		git add "$filename"
 	done <<< "$selected_options"
 
- 	# while true; do
-    #     local answer
-    #     read -p "Do you want to commit changes? (y/n) " answer
-    #     case "$answer" in
-    #         [Yy]|[Yy][Ee][Ss])
-    #             break
-    #             ;;
-    #         [Nn]|[Nn][Oo])
-    #             echo "No problem!"
-    #             break
-    #             ;;
-    #         *)
-    #             echo "Please enter yes or no."
-    #             ;;
-    #     esac
-    # done
+	local commit_now=false
+ 	while true; do
+        local answer
+        read -p "Do you want to commit changes? (y/n) " answer
+        case "$answer" in
+            [Yy]|[Yy][Ee][Ss])
+				commit_now=true
+                break
+                ;;
+            [Nn]|[Nn][Oo])
+                echo "No problem!"
+                break
+                ;;
+            *)
+                echo "Please enter yes or no."
+                ;;
+        esac
+    done
+
+	if [[ "$commit_now" = true ]]; then
+		local commit_msg
+		read -p "Enter commit message? " commit_msg
+		commit_override_command_git	"$commit_msg"
+	fi
+
 }
 
 commit_override_command_git() {
@@ -213,38 +222,42 @@ commit_override_command_git() {
 	cleanup_override_command_git
 
 	local new_ticket_no=""
+	local has_ticket_no=false
 
 	local current_ticket_no=$(echo "$current_branch" | \
 		awk -F'/' '{print $NF}' | \
 		grep -oE "$ticket_format")
     if [ -n "$current_ticket_no" ]; then
         # msg="$current_ticket_no: $(capitalize_first_letter "$all_params")"
-		echo "Good ticket number: $current_ticket_no"
+		echo "Ticket No: $current_ticket_no"
+		has_ticket_no=true
 	else
 		local pad_length=$((ticket_max_num - 1))
 		local default_ticket_no=1
 		new_ticket_no="${ticket_prefix_txt}-$(str_pad "" $pad_length "0")${default_ticket_no}"
 	fi
 
-	while true; do
-		local answer
-		local formatted_answer
-		read -p "Enter ticker number (default: $new_ticket_no): " answer
+	if [[ "$has_ticket_no" = false ]]; then
+		while true; do
+			local answer
+			local formatted_answer
+			read -p "Enter ticker number (default: $new_ticket_no): " answer
 
-		formatted_answer=$(echo "$answer" | \
-			awk -F'/' '{print $NF}' | \
-			grep -oE "$ticket_format")
-			
-		if [ -z "$answer" ]; then
-			current_ticket_no="$new_ticket_no"
-			break
-		elif [ -n "$formatted_answer" ]; then
-			current_ticket_no="$formatted_answer"
-			break
-		else
-			echo "'$answer' doesn't match with the required ticket pattern."
-		fi
-	done
+			formatted_answer=$(echo "$answer" | \
+				awk -F'/' '{print $NF}' | \
+				grep -oE "$ticket_format")
+				
+			if [ -z "$answer" ]; then
+				current_ticket_no="$new_ticket_no"
+				break
+			elif [ -n "$formatted_answer" ]; then
+				current_ticket_no="$formatted_answer"
+				break
+			else
+				echo "'$answer' doesn't match with the required ticket pattern."
+			fi
+		done
+	fi
 
 	while true; do
 		local commit_now
