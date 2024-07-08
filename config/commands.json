@@ -130,8 +130,15 @@
         },
         {
             "command": "g:push",
-            "alt_command": "gpush",
+            "alt_command": "gp",
             "alias": "git push origin HEAD",
+            "group": "git",
+            "description": "Git push to origin head"
+        },
+        {
+            "command": "g:add_repo_settings",
+            "alt_command": "g:ars",
+            "alias": "add_custom_setting_override_command_git",
             "group": "git",
             "description": "Git push to origin head"
         }

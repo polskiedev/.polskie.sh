@@ -61,6 +61,10 @@ pathinfo_override_command_git() {
 	pathinfo["file_ticket_prefix"]=$file_ticket_prefix
 	pathinfo["file_ticket_max"]=$file_ticket_max
 
+	pathinfo["default_ticket_format"]="[[:alnum:]]{3,}-[0-9]{6}"
+	pathinfo["default_ticket_prefix"]="DEV"
+	pathinfo["default_ticket_max"]="6"
+
     # Return associative array
     echo "$(declare -p pathinfo)"
 }
@@ -374,6 +378,7 @@ add_default_setting_override_command_git() {
 }
 
 add_custom_setting_override_command_git() {
+	# Todo: Fix variable naming
 	echo "add_custom_setting_override_command_git()"
 	eval "$(pathinfo_override_command_git)"
 
@@ -384,9 +389,50 @@ add_custom_setting_override_command_git() {
 	local ticket_prefix="${pathinfo['file_ticket_prefix']}"
 	local ticket_max="${pathinfo['file_ticket_max']}"
 
+	local default_ticket_format="${pathinfo['default_ticket_format']}"
+	local default_ticket_prefix="${pathinfo['default_ticket_prefix']}"
+	local default_ticket_max="${pathinfo['default_ticket_max']}"
+	local repository="${pathinfo['repository']}"
+	
 	cleanup_override_command_git
 
-	add_to_temp "$type" "$format_ticket" "[[:alnum:]]{2,}-[0-9]{5,6}"
-	add_to_temp "$type" "$ticket_prefix" "TN"
-	add_to_temp "$type" "$ticket_max" "6"
+	if [ ! -f "${settings_dir}/${format_ticket}" ]; then
+		local ask1
+		local new_format_ticket="$default_ticket_format"
+		read -p "Format ticket settings not found for repository '$repository'. \
+					Creating file. What would be the format (default: '$default_ticket_format')? " ask1
+
+		if [ -n "$ask1" ]; then
+			new_format_ticket="$ask1"
+		fi
+
+		add_to_temp "$type" "$format_ticket" "$new_format_ticket"
+	fi
+
+	if [ ! -f "${settings_dir}/${ticket_prefix}" ]; then
+		local ask2
+		local new_ticket_prefix="$default_ticket_prefix"
+		read -p "Ticket prefix settings not found for repository '$repository'. \
+					What would be the ticket prefix (default: '$default_ticket_prefix')? " ask2
+
+		if [ -n "$ask2" ]; then
+			new_ticket_prefix="$ask2"
+		fi
+		
+		add_to_temp "$type" "$ticket_prefix" "$new_ticket_prefix"
+	fi
+
+
+	if [ ! -f "${settings_dir}/${ticket_max}" ]; then
+		local ask3
+		local new_ticket_max="$default_ticket_max"
+		read -p "Ticket max settings not found for repository '$repository'. \
+					What would be ticket max (default: '$default_ticket_max')? " ask3
+
+		if [ -n "$ask3" ]; then
+			new_ticket_max="$ask2"
+		fi
+		
+		add_to_temp "$type" "$ticket_max" "$new_ticket_max"
+	fi
 }
