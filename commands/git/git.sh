@@ -280,6 +280,7 @@ commit_override_command_git() {
 	local current_ticket_no=$(echo "$current_branch" | \
 		awk -F'/' '{print $NF}' | \
 		grep -oE "$ticket_format")
+
     if [ -n "$current_ticket_no" ]; then
         # msg="$current_ticket_no: $(capitalize_first_letter "$all_params")"
 		echo "Ticket No: $current_ticket_no"
@@ -360,6 +361,7 @@ add_default_setting_override_command_git() {
 
 	local type="settings"
 	local settings_dir="${pathinfo['settings_dir']}"
+
 	local format_ticket="${pathinfo['default_file_format_ticket']}"
 	local ticket_prefix="${pathinfo['default_file_ticket_prefix']}"
 	local ticket_max="${pathinfo['default_file_ticket_max']}"
@@ -368,5 +370,23 @@ add_default_setting_override_command_git() {
 
 	add_to_temp "$type" "$format_ticket" "[[:alnum:]]{3,}-[0-9]{6}"
 	add_to_temp "$type" "$ticket_prefix" "DEV"
+	add_to_temp "$type" "$ticket_max" "6"
+}
+
+add_custom_setting_override_command_git() {
+	echo "add_custom_setting_override_command_git()"
+	eval "$(pathinfo_override_command_git)"
+
+	local type="settings"
+	local settings_dir="${pathinfo['settings_dir']}"
+
+	local format_ticket="${pathinfo['file_format_ticket']}"
+	local ticket_prefix="${pathinfo['file_ticket_prefix']}"
+	local ticket_max="${pathinfo['file_ticket_max']}"
+
+	cleanup_override_command_git
+
+	add_to_temp "$type" "$format_ticket" "[[:alnum:]]{2,}-[0-9]{5,6}"
+	add_to_temp "$type" "$ticket_prefix" "TN"
 	add_to_temp "$type" "$ticket_max" "6"
 }
