@@ -235,7 +235,7 @@ add_override_command_git() {
 
 	if [[ "$commit_now" = true ]]; then
 		local commit_msg
-		read -p "Enter commit message? " commit_msg
+		read -p "Please enter commit message: " commit_msg
 		commit_override_command_git	"$commit_msg"
 	fi
 }
