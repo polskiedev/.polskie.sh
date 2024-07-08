@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env/vars.sh
+source "$HOME/.devenv/packages/.polskie.sh/.env/vars.sh"
 source "$HOME/.devenv/common/sources.sh" #temp
 # source $(realpath "$HOME/.devenv.sources.sh")
 
@@ -35,7 +35,7 @@ make_symlinks() {
 
 makefile() {
     echo "Running makefile function..."
-    ./makefile.sh --init
+    bash "$PATH_POLSKIE_SH/makefile.sh" --init
 }
 
 first_run() {

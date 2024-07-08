@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .env/vars.sh
+source "$HOME/.devenv/packages/.polskie.sh/.env/vars.sh"
 source "$HOME/.devenv/common/sources.sh" #temp
 # #cannot use code below, this code will create that file
 # source $(realpath "$HOME/.devenv.sources.sh")
