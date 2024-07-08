@@ -30,6 +30,9 @@ pathinfo_override_command_git() {
 	local ticket_prefix_txt=""
 	local ticket_max_num=0
 
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+	# This block is using the old txt file method of saving settings @Start
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 	if [ -f "${settings_dir}/${file_format_ticket}" ]; then
 		ticket_format=$(head -n 1 "${settings_dir}/${file_format_ticket}")
 	elif [ -f "${settings_dir}/${default_file_format_ticket}" ]; then
@@ -47,6 +50,9 @@ pathinfo_override_command_git() {
 	elif [ -f "${settings_dir}/${default_file_ticket_max}" ]; then
 		ticket_max_num=$(head -n 1 "${settings_dir}/${default_file_ticket_max}")
 	fi
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+	# This block is using the old txt file method of saving settings @End
+	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
 	pathinfo["ticket_format"]="$ticket_format"
 	pathinfo["ticket_prefix_txt"]="$ticket_prefix_txt"
@@ -379,6 +385,7 @@ add_default_setting_override_command_git() {
 
 add_custom_setting_override_command_git() {
 	# Todo: Fix variable naming
+	# ! To deprecate, causing to many files
 	echo "add_custom_setting_override_command_git()"
 	eval "$(pathinfo_override_command_git)"
 
@@ -421,7 +428,6 @@ add_custom_setting_override_command_git() {
 		
 		add_to_temp "$type" "$ticket_prefix" "$new_ticket_prefix"
 	fi
-
 
 	if [ ! -f "${settings_dir}/${ticket_max}" ]; then
 		local ask3
