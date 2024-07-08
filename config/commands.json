@@ -2,7 +2,7 @@
     "commands": [
         {
             "command": "deploy",
-            "alias": "devenv_deploy",
+            "alias": "devenv_deploy; set_ps",
             "group": "DevEnv",
             "description": "Deploy devenv repository"
         },
