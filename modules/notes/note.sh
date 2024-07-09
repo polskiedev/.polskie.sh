@@ -6,15 +6,28 @@ get_note_path() {
 }
 
 get_new_note_filename() {
+	local date_args=()
+    date_args+=("--date")
+
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("days" "prefix")
+    local args=("$@")
+
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+	if [[ "${result["days"]}" != false ]]; then
+        date_args+=("--days:${result["days"]}")
+	fi
+
     # Get the current date and time in the specified format
-    local timestamp="$(get_datetime --date)"
+    local timestamp="$(get_datetime "${date_args[@]}")"
     local filename
     local prefix
 
     # Create the filename
-    if [ -n "$1" ]; then
+	if [[ "${result["prefix"]}" != false ]]; then
         # slugify
-        prefix="$(slugify "$1")"
+        prefix="$(slugify "${result["prefix"]}")"
         filename="${prefix}_${timestamp}.txt"
     else
         filename="${timestamp}.txt"
@@ -156,10 +169,19 @@ open_note() {
     local dest_path="$(get_note_path)"
     local filename="$(get_new_note_filename "$@")"
 
-    if [ -n "$1" ]; then
-        filename="$1"
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("filename")
+    local args=("$@")
+
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+
+    if [[ "${result["filename"]}" != false ]]; then
+        filename="${result["filename"]}"
     fi
 
+    # echo "$filename"
+    # return
     create_note "$filename"
 
     # Change below based on prefered editor
@@ -170,8 +192,15 @@ create_note() {
     local dest_path="$(get_note_path)"
     local filename="$(get_new_note_filename "$@")"
 
-    if [ -n "$1" ]; then
-        filename="$1"
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("filename")
+    local args=("$@")
+
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+
+    if [[ "${result["filename"]}" != false ]]; then
+        filename="${result["filename"]}"
     fi
 
     if [ -f "$dest_path/$filename" ]; then
