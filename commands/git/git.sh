@@ -325,13 +325,13 @@ commit_override_command_git() {
 
 	while true; do
 		local commit_now
-		msg="${current_ticket_no}: $(ucfirst "$msg")"
-		read -p "Are you okay with this commit message \"$msg\"? (y/n) " commit_now
+		local commit_msg="${current_ticket_no}: $(ucfirst "$msg")"
+		read -p "Are you okay with this commit message \"$commit_msg\"? (y/n) " commit_now
 
         case "$commit_now" in
             [Yy]|[Yy][Ee][Ss])
-                echo "git commit -m \"$msg\""
-                git commit -m "$msg"
+                echo "git commit -m \"$commit_msg\""
+                git commit -m "$commit_msg"
 				break
 				;;
 			[Nn]|[Nn][Oo])
