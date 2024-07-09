@@ -14,6 +14,13 @@
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
+            "command": "note:nextday",
+            "alt_command": "note:nd",
+            "alias": "open_note --days:+1",
+            "group": "Notes",
+            "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
+        },
+        {
             "command": "note:list",
             "alt_command": "note:l",
             "alias": "list_notes --action:open",

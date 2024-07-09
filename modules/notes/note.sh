@@ -37,6 +37,7 @@ get_new_note_filename() {
 }
 
 list_notes() {
+    # Todo: Not correctly opening selected file
     local search_dir="$(get_note_path)"
     local action="open"
     declare -A result
@@ -130,12 +131,14 @@ list_notes() {
 			;;
     esac
 
+
     # Check if a file was selected
     if [[ -n "$selected_options" ]]; then
         case "${result["action"]}" in
             "open")
                 local filename="$(echo "$selected_options" | cut -d "|" -f2).txt"
-                open_note "$filename"
+
+                open_note --filename:"$filename"
                 ;;
             "delete")
                 # Todo: Ask for confirmation before deleting
