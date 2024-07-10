@@ -152,7 +152,7 @@
         },
         {
             "command": "e",
-            "alias": "open_fzf_nvim",
+            "alias": "go_to_list_override_command_cd; open_fzf_nvim",
             "group": "nvim",
             "description": "Open file from fzf to nvim"
         }
