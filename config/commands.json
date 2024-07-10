@@ -150,7 +150,7 @@
             "description": "Git push to origin head"
         },
         {
-            "command": "code",
+            "command": "e",
             "alias": "open_fzf_nvim",
             "group": "nvim",
             "description": "Open file from fzf to nvim"
