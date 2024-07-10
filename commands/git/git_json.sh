@@ -65,6 +65,7 @@ modify_config_file_override_command_git_from_json() {
 
 	local json_file="${settings_dir}/${default_file}"
 	local temp_json_file="${settings_dir}/${settings_temp_file}"
+
 	declare -A settings_json=()
 	declare -A setting_labels=()
 
@@ -80,64 +81,27 @@ modify_config_file_override_command_git_from_json() {
 		json_file="${settings_dir}/${settings_file}"
 	fi
 
-	if [[ ! -f "$json_file" ]]; then
-		echo "Creating default configuration for repository: '$repository'"
-		echo '{}' > "$json_file"
+	make_json_file settings_json --file:"$json_file" --tmpfile:"$temp_json_file"
 
-		# Process json file creation
-		local jq_command_list=()
-		local jq_command_str
-		local jq_command="jq"
-		local jq_command2="'{"
-
-		for key in "${!settings_json[@]}"; do
-			value=${settings_json[$key]}
-			# echo "$key: $value"
-			jq_command+=" --arg $key \"$value\" [newline]"
-			jq_command_list+=("\"$key\": \$$key")
-		done
-
-		jq_command_str=$(IFS=,; echo "${jq_command_list[*]}")
-		jq_command_str="${jq_command_str//,/, }"
-
-		jq_command2+=$jq_command_str
-		jq_command2+="}' [newline]"
-
-		jq_command+=" $jq_command2"
-		jq_command+=" \"$json_file\" [newline]> \"$temp_json_file\" [newline]"
-		jq_command+=" && mv \"$temp_json_file\" \"$json_file\""
-
-		jq_command="$(echo $jq_command | sed -e 's/\[newline\]/\\'\\n'/g')"
-
-		# echo "jq_command: $jq_command"
-		eval "$jq_command"
-	fi
-
+	echo "for_config_type: $for_config_type"
 	if [ "$for_config_type" = "repository" ]; then
-		compressed_output=$(jq -c '.' "$json_file")
-		jq_output=$(echo "$compressed_output" | jq -r 'to_entries[] | "\(.key) \(.value)"')
+		declare -A json_file_data
+		get_json_data json_file_data --file:"$json_file"
 
-		declare -A json_data
-	
-		# Read compressed JSON output line by line
-		while IFS= read -r line; do
-			key=$(echo "$line" | awk '{print $1}')
-			value=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
-			json_data["$key"]=$value
-		done <<< "$jq_output"
-
-		# for key in "${!json_data[@]}"; do
-		# 	echo "$key: $value"
+		# for key2 in "${!json_file_data[@]}"; do
+		# 	local value2="${json_file_data[$key2]}"
+		# 	echo "2: $key2: $value2"
 		# done
 
 		for key in "${!setting_labels[@]}"; do
 			local ask1
 			local label=${setting_labels[$key]}
-			local current_value="${json_data["$key"]}"
+			local current_value="${json_file_data["$key"]}"
 			local default_value="${settings_json["$key"]}"
 			local value="$current_value"
 			# echo "$key: $value"
 
+			echo "========="
 			echo "Default '$label' is '$default_value'"
 			read -p "What would be the '$label' in repository '$repository' (Current: '$current_value')? " ask1
 
@@ -160,5 +124,6 @@ modify_config_file_override_command_git_from_json() {
 		done
 	fi
 
-	echo "Config File: $json_file"
+	echo "Config file '$json_file' output:"
+	cat "$json_file"
 }

@@ -162,6 +162,12 @@
             "alias": "modify_config_file_override_command_git_from_json --repository",
             "group": "git",
             "description": "For creating repository configurations"
+        },
+        {
+            "command": "t",
+            "alias": "echo 'This is a test'",
+            "group": "test",
+            "description": "Testing only"
         }
     ]
 }
