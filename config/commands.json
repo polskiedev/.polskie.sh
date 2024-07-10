@@ -155,6 +155,13 @@
             "alias": "go_to_list_override_command_cd; open_fzf_nvim",
             "group": "nvim",
             "description": "Open file from fzf to nvim"
+        },
+        {
+            "command": "git:json_config",
+            "alt_command": "g:jc",
+            "alias": "modify_config_file_override_command_git_from_json --repository",
+            "group": "git",
+            "description": "For creating repository configurations"
         }
     ]
 }

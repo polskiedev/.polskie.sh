@@ -11,12 +11,14 @@ pathinfo_override_command_git_from_json() {
 	repo_name=$(basename "$repo_path")
 
     pathinfo["settings_dir"]="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
-    pathinfo["default_file"]="default.json"
 	pathinfo["default_ticket_format"]="[[:alnum:]]{3,}-[0-9]{6}"
 	pathinfo["default_ticket_prefix"]="DEV"
 	pathinfo["default_ticket_max"]="6"
+
+    pathinfo["default_file"]="default.json"
 	pathinfo["settings_file"]="${repo_name}.json"
 	pathinfo["settings_temp_file"]="temp.json"
+
 	pathinfo["repository"]="$repo_name"
 
     # Return associative array
@@ -28,9 +30,24 @@ cleanup_override_command_git_from_json() {
     unset pathinfo
 }
 
-add_default_setting_override_command_git_from_json() {
-	echo "add_default_setting_override_command_git_from_json()"
+modify_config_file_override_command_git_from_json() {
+	echo "modify_config_file_override_command_git_from_json()"
 	eval "$(pathinfo_override_command_git_from_json)"
+
+	local for_config_type=""
+	if [[ -n "$1" ]]; then
+		case "$1" in
+			"--default") for_config_type="default" ;;
+			"--repository") for_config_type="repository" ;;
+			*)
+				echo "Invalid parameter."
+				return 1
+				;;
+		esac
+	else
+		echo "Config type not provided."
+		return 1
+	fi
 
 	local type="settings"
 	local repository="${pathinfo['repository']}"
@@ -49,134 +66,99 @@ add_default_setting_override_command_git_from_json() {
 	local json_file="${settings_dir}/${default_file}"
 	local temp_json_file="${settings_dir}/${settings_temp_file}"
 	declare -A settings_json=()
+	declare -A setting_labels=()
 
-	echo '{}' > "$json_file"
+	setting_labels["ticket_format"]="Ticket Format"
+	setting_labels["ticket_max"]="Max length of Ticket No."
+	setting_labels["ticket_prefix"]="Ticket Prefix"
 
 	settings_json["ticket_format"]="$default_ticket_format"
 	settings_json["ticket_prefix"]="$default_ticket_prefix"
 	settings_json["ticket_max"]="$default_ticket_max"
 
-	# Process json file creation
-	local jq_command_list=()
-	local jq_command_str
-	local jq_command="jq"
-	local jq_command2="'{"
+	if [ "$for_config_type" = "repository" ]; then
+		json_file="${settings_dir}/${settings_file}"
+	fi
 
-	for key in "${!settings_json[@]}"; do
-    	value=${settings_json[$key]}
-   		# echo "$key: $value"
-		jq_command+=" --arg $key \"$value\" [newline]"
-		jq_command_list+=("\"$key\": \$$key")
-	done
+	if [[ ! -f "$json_file" ]]; then
+		echo "Creating default configuration for repository: '$repository'"
+		echo '{}' > "$json_file"
 
-	jq_command_str=$(IFS=,; echo "${jq_command_list[*]}")
-	jq_command_str="${jq_command_str//,/, }"
+		# Process json file creation
+		local jq_command_list=()
+		local jq_command_str
+		local jq_command="jq"
+		local jq_command2="'{"
 
-	jq_command2+=$jq_command_str
-	jq_command2+="}' [newline]"
+		for key in "${!settings_json[@]}"; do
+			value=${settings_json[$key]}
+			# echo "$key: $value"
+			jq_command+=" --arg $key \"$value\" [newline]"
+			jq_command_list+=("\"$key\": \$$key")
+		done
 
-	jq_command+=" $jq_command2"
-	jq_command+=" \"$json_file\" [newline]> \"$temp_json_file\" [newline]"
-	jq_command+=" && mv \"$temp_json_file\" \"$json_file\""
+		jq_command_str=$(IFS=,; echo "${jq_command_list[*]}")
+		jq_command_str="${jq_command_str//,/, }"
 
-	jq_command="$(echo $jq_command | sed -e 's/\[newline\]/\\'\\n'/g')"
+		jq_command2+=$jq_command_str
+		jq_command2+="}' [newline]"
 
-	echo "jq_command: $jq_command"
-	eval "$jq_command"
-}
+		jq_command+=" $jq_command2"
+		jq_command+=" \"$json_file\" [newline]> \"$temp_json_file\" [newline]"
+		jq_command+=" && mv \"$temp_json_file\" \"$json_file\""
 
-add_custom_setting_override_command_git_from_json() {
-	echo "add_default_setting_override_command_git_from_json()"
-	eval "$(pathinfo_override_command_git_from_json)"
+		jq_command="$(echo $jq_command | sed -e 's/\[newline\]/\\'\\n'/g')"
 
-	local type="settings"
-	local repository="${pathinfo['repository']}"
+		# echo "jq_command: $jq_command"
+		eval "$jq_command"
+	fi
 
-	local settings_dir="${pathinfo['settings_dir']}"
-	local settings_file="${pathinfo['settings_file']}"
-	local settings_temp_file="${pathinfo['settings_temp_file']}"
+	if [ "$for_config_type" = "repository" ]; then
+		compressed_output=$(jq -c '.' "$json_file")
+		jq_output=$(echo "$compressed_output" | jq -r 'to_entries[] | "\(.key) \(.value)"')
+
+		declare -A json_data
 	
-	local default_file="${pathinfo['default_file']}"
-	local default_ticket_format="${pathinfo['default_ticket_format']}"
-	local default_ticket_prefix="${pathinfo['default_ticket_prefix']}"
-	local default_ticket_max="${pathinfo['default_ticket_max']}"
-	
-	cleanup_override_command_git_from_json
+		# Read compressed JSON output line by line
+		while IFS= read -r line; do
+			key=$(echo "$line" | awk '{print $1}')
+			value=$(echo "$line" | awk '{$1=""; print $0}' | xargs)
+			json_data["$key"]=$value
+		done <<< "$jq_output"
 
-	local json_file="${settings_dir}/${settings_file}"
-	local temp_json_file="${settings_dir}/${settings_temp_file}"
-	declare -A settings_json=()
+		# for key in "${!json_data[@]}"; do
+		# 	echo "$key: $value"
+		# done
 
-	settings_json["repository"]="$repository"
-	settings_json["ticket_format"]="$default_ticket_format"
-	settings_json["ticket_prefix"]="$default_ticket_prefix"
-	settings_json["ticket_max"]="$default_ticket_max"
+		for key in "${!setting_labels[@]}"; do
+			local ask1
+			local label=${setting_labels[$key]}
+			local current_value="${json_data["$key"]}"
+			local default_value="${settings_json["$key"]}"
+			local value="$current_value"
+			# echo "$key: $value"
 
-	while true; do
-		local ask0
-		read -p "Would you like to create configuration file for repository '$repository'? (y/n) " ask0
-		case "$ask0" in
-			[Yy]|[Yy][Ee][Ss])
-				break
-				;;
-			[Nn]|[Nn][Oo])
-				echo "No problem!"
-				return 1
-				break
-				;;
-			*)
-				echo "Please enter yes or no."
-				;;
-		esac
-	done
+			echo "Default '$label' is '$default_value'"
+			read -p "What would be the '$label' in repository '$repository' (Current: '$current_value')? " ask1
 
-	local ask1
-	local ask2
-	local ask3
+			if [ -n "$ask1" ]; then
+				value="$ask1"
+			fi
 
-	read -p "What would be the ticket format (default: '$default_ticket_format')? " ask1
+			if [ "$current_value" != "$value" ]; then
+				local jq_command="jq '." 
+				jq_command+="$key = "
+				jq_command+='"'
+				jq_command+="$value"
+				jq_command+='"'
+				jq_command+="'"
+				jq_command+=" \"$json_file\" > \"$temp_json_file\" && mv \"$temp_json_file\" \"$json_file\""
 
-	if [ -n "$ask1" ]; then
-		settings_json["ticket_format"]t="$ask1"
+				# echo "jq_command: $jq_command"
+				eval "$jq_command"
+			fi
+		done
 	fi
 
-	read -p "What would be the ticket prefix (default: '$default_ticket_prefix')? " ask2
-
-	if [ -n "$ask2" ]; then
-		settings_json["ticket_prefix"]="$ask2"
-	fi
-
-	read -p "What would be ticket max (default: '$default_ticket_max')? " ask3
-
-	if [ -n "$ask3" ]; then
-		settings_json["ticket_max"]="$ask2"
-	fi
-
-	# Process json file creation
-	local jq_command_list=()
-	local jq_command_str
-	local jq_command="jq"
-	local jq_command2="'{"
-
-	for key in "${!settings_json[@]}"; do
-    	value=${settings_json[$key]}
-   		# echo "$key: $value"
-		jq_command+=" --arg $key \"$value\" [newline]"
-		jq_command_list+=("\"$key\": \$$key")
-	done
-
-	jq_command_str=$(IFS=,; echo "${jq_command_list[*]}")
-	jq_command_str="${jq_command_str//,/, }"
-
-	jq_command2+=$jq_command_str
-	jq_command2+="}' [newline]"
-
-	jq_command+=" $jq_command2"
-	jq_command+=" \"$json_file\" [newline]> \"$temp_json_file\" [newline]"
-	jq_command+=" && mv \"$temp_json_file\" \"$json_file\""
-
-	jq_command="$(echo $jq_command | sed -e 's/\[newline\]/\\'\\n'/g')"
-
-	echo "jq_command: $jq_command"
-	eval "$jq_command"
+	echo "Config File: $json_file"
 }
