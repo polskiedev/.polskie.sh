@@ -148,6 +148,12 @@
             "alias": "add_custom_setting_override_command_git",
             "group": "git",
             "description": "Git push to origin head"
+        },
+        {
+            "command": "code",
+            "alias": "open_fzf_nvim",
+            "group": "nvim",
+            "description": "Open file from fzf to nvim"
         }
     ]
 }
