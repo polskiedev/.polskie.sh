@@ -2,34 +2,35 @@
     "commands": [
         {
             "command": "deploy",
+            "alt_command": "dd",
             "alias": "devenv_deploy",
             "group": "DevEnv",
             "description": "Deploy devenv repository"
         },
         {
             "command": "note:create",
-            "alt_command": "note",
+            "alt_command": "n:c",
             "alias": "open_note",
             "group": "Notes",
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
-            "command": "note:nd",
-            "alt_command": "note:t",
+            "command": "note:t",
+            "alt_command": "n:t",
             "alias": "open_note --days:+1",
             "group": "Notes",
             "description": "Add a note for tomorrow. (or Next day)"
         },
         {
             "command": "note:list",
-            "alt_command": "note:l",
+            "alt_command": "n",
             "alias": "list_notes --action:open",
             "group": "Notes",
             "description": "List of available notes, chose what to open"
         },
         {
             "command": "note:delete",
-            "alt_command": "note:d",
+            "alt_command": "n:d",
             "alias": "list_notes --action:delete",
             "group": "Notes",
             "description": "Delete a chosen note"
@@ -144,7 +145,7 @@
         },
         {
             "command": "g:add_repo_settings",
-            "alt_command": "g:ars",
+            "alt_command": "gars",
             "alias": "add_custom_setting_override_command_git",
             "group": "git",
             "description": "Git push to origin head"
