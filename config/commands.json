@@ -36,6 +36,13 @@
             "description": "Delete a chosen note"
         },
         {
+            "command": "code:list",
+            "alt_command": "code:l",
+            "alias": "go_to_list_override_command_vscode",
+            "group": "vscode",
+            "description": "VScode Open Project Folder"
+        },
+        {
             "command": "vsce:install",
             "alt_command": "vsce:i",
             "alias": ". $PATH_DEVAPPS/setup.sh install:vscode.ext",
