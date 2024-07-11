@@ -93,6 +93,51 @@ get_git_repo_name() {
 
 override_command_git() {
 	echo "override_command_git()"
+	# ###############################################
+	local git_command="$1"
+	shift
+	# ###############################################
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("showdata")
+    local args=("$@")
+
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+
+    count=${#remaining_parameters[@]}
+
+    if [[ "${result["showdata"]}" = true ]]; then
+        IFS=','; joined_string="${args[*]}"; unset IFS
+        echo "Passed Arguments: ($joined_string)"
+
+        echo "Request Parameters:"
+        for key in "${!result[@]}"; do
+            echo "$key: ${result[$key]}"
+        done
+
+        echo "Remaining Parameters:"
+        for param in "${remaining_parameters[@]}"; do
+            echo "$param"
+        done
+    fi
+	# ###############################################
+	# Temp only
+	if [ "$git_command" != "checkout" ]; then
+		command git "$git_command" "$@"
+		git "$git_command" "$@"
+		return
+	fi
+
+	# ###############################################
+	if [ "$git_command" == "checkout" ]; then
+		command git "$git_command" "$@"
+
+		if [ $? -eq 0 ]; then
+			log_info "Checkout successful"
+		else
+			log_error "Failed to checkout"
+		fi
+	fi
 }
 
 status_override_command_git() {
@@ -188,7 +233,15 @@ add_override_command_git() {
 							sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")"; \
 						echo "File: $file"; \
 						echo "================================="; \
-						cat "$file"'
+						if [ -f "$file" ]; then \
+							cat "$file"; \
+						else \
+							if [ -e "$file" ]; then \
+								echo "$file is a $(file -b "$file")"; \
+							else \
+								echo "$file does not exist."; \
+							fi \
+						fi'
 		preview=$(echo "$preview" | sed -e "s/###/'/g")
 
 		local header=("Repository: '$repo_name'" \

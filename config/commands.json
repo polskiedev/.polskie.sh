@@ -104,7 +104,7 @@
         {
             "command": "g:checkout",
             "alt_command": "gco",
-            "alias": "git checkout",
+            "alias": "override_command_git checkout",
             "group": "git",
             "description": "Git checkout"
         },
@@ -149,6 +149,13 @@
             "alias": "add_custom_setting_override_command_git",
             "group": "git",
             "description": "Git push to origin head"
+        },
+        {
+            "command": "git",
+            "alt_command": "g",
+            "alias": "override_command_git",
+            "group": "git",
+            "description": "Git override command"
         },
         {
             "command": "e",
