@@ -182,6 +182,12 @@
             "alias": "echo 'This is a test'",
             "group": "test",
             "description": "Testing only 1"
+        },
+        {
+            "command": "s",
+            "alias": "spinner",
+            "group": "misc",
+            "description": "Spinner"
         }
     ]
 }
