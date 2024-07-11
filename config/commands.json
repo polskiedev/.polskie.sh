@@ -181,7 +181,7 @@
             "command": "t",
             "alias": "echo 'This is a test'",
             "group": "test",
-            "description": "Testing only"
+            "description": "Testing only 1"
         }
     ]
 }

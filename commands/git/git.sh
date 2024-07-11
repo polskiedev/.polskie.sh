@@ -245,12 +245,13 @@ add_override_command_git() {
 		log_info "Adding all changes to git"
 		git add .
 	else
-		local counter=1
+		local counter=0
 		# Sort by status, then by path_name
 		local git_status=$(git status --porcelain | sort -k1,1 -k2 -r)
 		local formatted_files=()
 		# Process each line of git status output
 		while IFS= read -r line; do
+			((counter++))
 			# Extract status and file path
 			local status="${line:0:2}"
 			local file="${line:3}"
@@ -258,8 +259,12 @@ add_override_command_git() {
 			# Print status and file in the required format
 			formatted_file="$counter|${status}| ${file}"
 			formatted_files+=("$formatted_file")
-			((counter++))
 		done <<< "$git_status"
+
+		if [ -z "$git_status" ]; then
+			log_info "Nothing to update."
+			return 1
+		fi
 
 		local preview='file="$(echo "{}" | \
 							tr -d "###" | \
@@ -296,16 +301,26 @@ add_override_command_git() {
 					--multi \
 					--header="$header"\
 				)
-		local option_count=$(echo "$selected_options" | wc -l)
+		# local option_count=$(echo "$selected_options" | wc -l)
 
-		while IFS= read -r option; do
-			local filename="$(echo "$option" | cut -d"|" -f3)"
-			filename="$(trim "$filename")"
+		if [ -z "$selected_options" ]; then
+			log_info "No items selected."
+			return 1
+		fi
 
-			if [ -n "$filename" ]; then
-				echo "Added '$filename' to git"
-				git add "$filename"
-				((git_added++))
+		# Loop through each selected item
+		while IFS= read -r item; do
+			# echo "Selected: $item"
+			# Process each selected item here
+			local filename="$(echo "$item" | cut -d"|" -f3 | trim)"
+			
+			if [[ -n "$filename" ]]; then
+				if git add "$filename"; then
+					log_success "Added '$filename' to git"
+					((git_added++))
+				else
+					log_error "Failed to add '$filename' to git"
+				fi
 			fi
 		done <<< "$selected_options"
 	fi
