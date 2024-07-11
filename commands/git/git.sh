@@ -154,12 +154,18 @@ override_command_git() {
 
 	# ###############################################
 	if [ "$git_command" == "checkout" ]; then
-		command git "$git_command" "$@"
 
+		if [ "$2" = "-" ]; then
+			shift
+			command git "$git_command" "$previous_branch" "$@"
+		else
+			command git "$git_command" "$@"
+		fi
+		
 		if [ $? -eq 0 ]; then
 			log_info "Checkout successful"
 			local latest_branch="$(git branch --show-current)"
-			if [ "$current_branch" != "$latest_branch"]; then
+			if [ "$current_branch" != "$latest_branch" ]; then
 				modify_json_data --file:"$file" --tmpfile:"$tmp_file" --jsonkey:"$previous_branch_key" --jsonvalue:"$current_branch"
 			fi
 		else
