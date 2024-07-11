@@ -94,6 +94,30 @@ get_git_repo_name() {
 override_command_git() {
 	echo "override_command_git()"
 	# ###############################################
+	eval "$(pathinfo_override_command_git)"
+
+	local default_file="${pathinfo['default_file']}"
+	local repository="${pathinfo['repository']}"
+	local settings_dir="${pathinfo['settings_dir']}"
+	local file="$settings_dir/${repository}.json"
+	local tmp_file="$settings_dir/tmp.${repository}.json"
+	local current_branch="$(git branch --show-current)"
+	local previous_branch_key="previous_branch"
+	local previous_branch=""
+	local latest_branch=""
+
+    declare -A json_result2
+    get_json_data json_result2 --file:"$file"
+	
+	if [ -v 'json_result2[$previous_branch_key]' ]; then
+		previous_branch="${json_result2["$previous_branch_key"]}"
+	fi
+
+	# echo "current_branch: $current_branch"
+	# echo "previous_branch: $previous_branch"
+	
+	cleanup_override_command_git
+	# ###############################################
 	local git_command="$1"
 	shift
 	# ###############################################
@@ -134,6 +158,10 @@ override_command_git() {
 
 		if [ $? -eq 0 ]; then
 			log_info "Checkout successful"
+			local latest_branch="$(git branch --show-current)"
+			if [ "$current_branch" != "$latest_branch"]; then
+				modify_json_data --file:"$file" --tmpfile:"$tmp_file" --jsonkey:"$previous_branch_key" --jsonvalue:"$current_branch"
+			fi
 		else
 			log_error "Failed to checkout"
 		fi
