@@ -231,17 +231,18 @@ add_override_command_git() {
 							tr -d "###" | \
 							cut -d"|" -f3 | \
 							sed -e "s/^[[:space:]]*//" -e "s/[[:space:]]*$//")"; \
-						echo "File: $file"; \
-						echo "================================="; \
 						if [ -f "$file" ]; then \
+							echo "File: $file"; \
+							echo "================================="; \
 							cat "$file"; \
 						else \
 							if [ -e "$file" ]; then \
-								echo "$file is a $(file -b "$file")"; \
+								echo "$file has no preview available"; \
 							else \
 								echo "$file does not exist."; \
 							fi \
 						fi'
+		# echo "$file is a $(file -b "$file")"; \
 		preview=$(echo "$preview" | sed -e "s/###/'/g")
 
 		local header=("Repository: '$repo_name'" \
