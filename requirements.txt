@@ -1,0 +1,6 @@
+Requirements
+
+- fzf - used for searching, most tools in this repo use this
+- jq - used for processing json files and data
+- bc (Basic Calculator), used in timers and loading indicators
+  - command: sudo apt-get install bc
