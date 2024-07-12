@@ -11,15 +11,22 @@ pathinfo_override_command_git_from_json() {
 	repo_name=$(basename "$repo_path")
 
     pathinfo["settings_dir"]="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
+	pathinfo["repository"]="$repo_name"
+	pathinfo["branch"]="$(git branch --show-current)"
+
 	pathinfo["default_ticket_format"]="[[:alnum:]]{3,}-[0-9]{6}"
 	pathinfo["default_ticket_prefix"]="DEV"
 	pathinfo["default_ticket_max"]="6"
 
     pathinfo["default_file"]="default.json"
-	pathinfo["settings_file"]="${repo_name}.json"
-	pathinfo["settings_temp_file"]="temp.json"
+	pathinfo["repository_file"]="${repo_name}.json"
+	pathinfo["temp_file"]="temp.json"
 
-	pathinfo["repository"]="$repo_name"
+	pathinfo["label_ticket_format"]="Ticket Format"
+	pathinfo["label_ticket_max"]="Max length of Ticket No."
+	pathinfo["label_ticket_prefix"]="Ticket Prefix"
+
+	pathinfo["key_previous_branch"]="previous_branch"
 
     # Return associative array
     echo "$(declare -p pathinfo)"
@@ -33,60 +40,71 @@ cleanup_override_command_git_from_json() {
 modify_config_file_override_command_git_from_json() {
 	echo "modify_config_file_override_command_git_from_json()"
 	eval "$(pathinfo_override_command_git_from_json)"
+	# ###############################################
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("showdata" "config")
+    local args=("$@")
 
-	local for_config_type=""
-	if [[ -n "$1" ]]; then
-		case "$1" in
-			"--default") for_config_type="default" ;;
-			"--repository") for_config_type="repository" ;;
-			*)
-				echo "Invalid parameter."
-				return 1
-				;;
-		esac
-	else
-		echo "Config type not provided."
-		return 1
-	fi
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+    count=${#remaining_parameters[@]}
 
-	local type="settings"
+    if [[ "${result["showdata"]}" = true ]]; then
+        IFS=','; joined_string="${args[*]}"; unset IFS
+        echo "Passed Arguments: ($joined_string)"
+
+        echo "Request Parameters:"
+        for key in "${!result[@]}"; do
+            echo "$key: ${result[$key]}"
+        done
+
+        echo "Remaining Parameters:"
+        for param in "${remaining_parameters[@]}"; do
+            echo "$param"
+        done
+    fi
+	# ###############################################
+	local config_type=""
+
+	case "${result["config"]}" in
+		"default" | "repository") config_type="${result["config"]}" ;;
+		*)
+			echo "Config type not provided."
+			return 1
+			;;
+	esac
+	# ###############################################
 	local repository="${pathinfo['repository']}"
 
-	local settings_dir="${pathinfo['settings_dir']}"
-	local settings_file="${pathinfo['settings_file']}"
-	local settings_temp_file="${pathinfo['settings_temp_file']}"
-	
-	local default_file="${pathinfo['default_file']}"
-	local default_ticket_format="${pathinfo['default_ticket_format']}"
-	local default_ticket_prefix="${pathinfo['default_ticket_prefix']}"
-	local default_ticket_max="${pathinfo['default_ticket_max']}"
-	
-	cleanup_override_command_git_from_json
-
-	local json_file="${settings_dir}/${default_file}"
-	local temp_json_file="${settings_dir}/${settings_temp_file}"
-
+	declare -A config_files=()
+	declare -a data_files=("default_file" "repository_file" "temp_file") 
+	declare -a data_column=("ticket_format" "ticket_max" "ticket_prefix")
 	declare -A settings_json=()
 	declare -A setting_labels=()
 
-	setting_labels["ticket_format"]="Ticket Format"
-	setting_labels["ticket_max"]="Max length of Ticket No."
-	setting_labels["ticket_prefix"]="Ticket Prefix"
+	for item in "${data_files[@]}"; do
+		config_files[$item]="${pathinfo['settings_dir']}/${pathinfo["$item"]}"
+	done
 
-	settings_json["ticket_format"]="$default_ticket_format"
-	settings_json["ticket_prefix"]="$default_ticket_prefix"
-	settings_json["ticket_max"]="$default_ticket_max"
+	for item in "${data_column[@]}"; do
+		settings_json[$item]="${pathinfo["default_$item"]}"
+		setting_labels[$item]="${pathinfo["label_$item"]}"
+	done
 
-	if [ "$for_config_type" = "repository" ]; then
-		json_file="${settings_dir}/${settings_file}"
+	local config_file="${config_files['default_file']}"
+	local temp_file="${config_files['temp_file']}"
+
+	if [ "$config_type" = "repository" ]; then
+		config_file="${config_files['repository_file']}"
 	fi
 
-	make_json_file settings_json --file:"$json_file" --tmpfile:"$temp_json_file"
+	cleanup_override_command_git_from_json
 
-	echo "for_config_type: $for_config_type"
-	if [ "$for_config_type" = "repository" ]; then
+	make_json_file settings_json --file:"$config_file" --tmpfile:"$temp_file"
+
+	if [ "$config_type" = "repository" ]; then
 		declare -A json_file_data
-		get_json_data json_file_data --file:"$json_file"
+		get_json_data json_file_data --file:"$config_file"
 
 		# for key2 in "${!json_file_data[@]}"; do
 		# 	local value2="${json_file_data[$key2]}"
@@ -116,14 +134,15 @@ modify_config_file_override_command_git_from_json() {
 				jq_command+="$value"
 				jq_command+='"'
 				jq_command+="'"
-				jq_command+=" \"$json_file\" > \"$temp_json_file\" && mv \"$temp_json_file\" \"$json_file\""
+				jq_command+=" \"$config_file\" > \"$temp_file\" && mv \"$temp_file\" \"$config_file\""
 
 				# echo "jq_command: $jq_command"
 				eval "$jq_command"
 			fi
 		done
-	fi
 
-	echo "Config file '$json_file' output:"
-	cat "$json_file"
+		echo "JSON file: '$config_file'"
+		echo "JSON file contents:"
+		cat "$config_file"
+	fi
 }

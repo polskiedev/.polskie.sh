@@ -91,35 +91,81 @@ get_git_repo_name() {
     fi
 }
 
+dump_override_command_git() {
+	eval "$(pathinfo_override_command_git_from_json)"
+
+	echo "Unsorted:"
+	for key2 in "${!pathinfo[@]}"; do
+		local value2="${pathinfo[$key2]}"
+		echo "1: $key2: $value2"
+	done
+
+	echo "Sorted:"
+	local sorted_keys=($(for key in "${!pathinfo[@]}"; do echo "$key"; done | sort))
+	for key2 in "${sorted_keys[@]}"; do
+		local value2="${pathinfo[$key2]}"
+		echo "2: $key2: $value2"
+	done
+}
+
 override_command_git() {
 	echo "override_command_git()"
 	# ###############################################
-	eval "$(pathinfo_override_command_git)"
+	eval "$(pathinfo_override_command_git_from_json)"
 
-	local default_file="${pathinfo['default_file']}"
+	declare -a data_files=("default_file" "repository_file" "temp_file") 
+	declare -a data_column=("ticket_format" "ticket_max" "ticket_prefix")
+	declare -A config_files=()
+	declare -A config_filenames=()
+
+	for item in "${data_files[@]}"; do
+		config_files[$item]="${pathinfo['settings_dir']}/${pathinfo["$item"]}"
+		config_filenames[$item]="${pathinfo["$item"]}"
+	done
+
+	# ###############################################
 	local repository="${pathinfo['repository']}"
-	local settings_dir="${pathinfo['settings_dir']}"
-	local file="$settings_dir/${repository}.json"
-	local tmp_file="$settings_dir/tmp.${repository}.json"
-	local current_branch="$(git branch --show-current)"
-	local previous_branch_key="previous_branch"
-	local previous_branch=""
+	local current_branch="${pathinfo['branch']}"
+
+	if [ "$repository" = "" ]; then
+        echo "Current directory is not in any git repository."
+		return 1
+	fi
+	# ###############################################
+	local config_file="${config_files['repository_file']}"
+	local temp_file="${config_files['temp_file']}"
+
+	local key_previous_branch="${pathinfo['key_previous_branch']}"
 	local latest_branch=""
 
     declare -A json_result2
-    get_json_data json_result2 --file:"$file"
+    get_json_data json_result2 --file:"$config_file"
 	
-	if [ -v 'json_result2[$previous_branch_key]' ]; then
-		previous_branch="${json_result2["$previous_branch_key"]}"
+	if [ ! -v 'json_result2[$key_previous_branch]' ]; then
+		echo "Configuration '$key_previous_branch' not set on JSON file."
+		return 1
 	fi
 
+	if [ "${json_result2["$key_previous_branch"]}" = "" ]; then
+		echo "Configuration '$key_previous_branch' not set."
+		return 1
+	fi
+
+	previous_branch="${json_result2["$key_previous_branch"]}"
 	# echo "current_branch: $current_branch"
 	# echo "previous_branch: $previous_branch"
 	
-	cleanup_override_command_git
+	cleanup_override_command_git_from_json
 	# ###############################################
 	local git_command="$1"
-	shift
+	local git_command2="$2"
+	shift 2
+
+	# This will make default behaviour to revert to previous branch
+	if [ "$git_command" = "-" ]; then
+		git_command="checkout"
+		git_command2="-"
+	fi	
 	# ###############################################
     declare -A result
     declare -a remaining_parameters
@@ -151,22 +197,20 @@ override_command_git() {
 		git "$git_command" "$@"
 		return
 	fi
-
 	# ###############################################
 	if [ "$git_command" == "checkout" ]; then
-
-		if [ "$2" = "-" ]; then
+		if [ "$git_command2" = "-" ]; then
 			shift
 			command git "$git_command" "$previous_branch" "$@"
 		else
-			command git "$git_command" "$@"
+			command git "$git_command" "$git_command2" "$@"
 		fi
 		
 		if [ $? -eq 0 ]; then
 			log_info "Checkout successful"
 			local latest_branch="$(git branch --show-current)"
 			if [ "$current_branch" != "$latest_branch" ]; then
-				modify_json_data --file:"$file" --tmpfile:"$tmp_file" --jsonkey:"$previous_branch_key" --jsonvalue:"$current_branch"
+				modify_json_data --file:"$config_file" --tmpfile:"$tmp_file" --jsonkey:"$key_previous_branch" --jsonvalue:"$current_branch"
 			fi
 		else
 			log_error "Failed to checkout"
@@ -176,25 +220,41 @@ override_command_git() {
 
 status_override_command_git() {
 	log_info "status_override_command_git()"
-	local repo_name=""
-	local branch_name=""
+	eval "$(pathinfo_override_command_git_from_json)"
 
-    if ! repo_name=$(get_git_repo_name); then
-        log_error "Current directory is not in any git repository."
+	local repository="${pathinfo['repository']}"
+	local current_branch="${pathinfo['branch']}"
+
+	cleanup_override_command_git_from_json
+
+	if [ "$repository" = "" ]; then
+        echo "Current directory is not in any git repository."
 		return 1
-    else
-        log_info "Repository: '$repo_name'"
-    fi
+	fi
 
-	branch_name="$(git branch --show-current)"
+    echo "Repository: '$repository'"
+	echo "Branch Name: '$current_branch'"
+	# ###############################################
+	# local repo_name=""
+	# local branch_name=""
 
-	log_info "Branch: '$branch_name'"
-	git status
+    # if ! repo_name=$(get_git_repo_name); then
+    #     log_error "Current directory is not in any git repository."
+	# 	return 1
+    # else
+    #     log_info "Repository: '$repo_name'"
+    # fi
+
+	# branch_name="$(git branch --show-current)"
+
+	# log_info "Branch: '$branch_name'"
+	command git status
 }
 
 add_override_command_git() {
 	echo "status_override_command_git()"
-
+	eval "$(pathinfo_override_command_git_from_json)"
+	# ###############################################
     declare -A result
     declare -a remaining_parameters
     local requested_vars=("showdata")
@@ -218,20 +278,21 @@ add_override_command_git() {
             echo "$param"
         done
     fi
-
-	local repo_name=""
-	local branch_name=""
-
-    if ! repo_name=$(get_git_repo_name); then
+	# ###############################################
+	local repository="${pathinfo['repository']}"
+	local current_branch="${pathinfo['branch']}"
+	cleanup_override_command_git_from_json
+	# ###############################################
+	# local repo_name=""
+	# local branch_name=""
+	if [ "$repository" = "" ]; then
         echo "Current directory is not in any git repository."
 		return 1
-    else
-        echo "Repository: '$repo_name'"
-    fi
+	fi
 
-	branch_name="$(git branch --show-current)"
-	echo "Branch Name: '$branch_name'"
-
+    echo "Repository: '$repository'"
+	echo "Branch Name: '$current_branch'"
+	# ###############################################
 	local git_add_all=false
 	for param in "${remaining_parameters[@]}"; do
 		if [ "$param" = "." ]; then
@@ -243,7 +304,7 @@ add_override_command_git() {
 	if [[ "$git_add_all" = true ]]; then
 		git_added=1
 		log_info "Adding all changes to git"
-		git add .
+		command git add .
 	else
 		local counter=0
 		# Sort by status, then by path_name
@@ -284,8 +345,8 @@ add_override_command_git() {
 		# echo "$file is a $(file -b "$file")"; \
 		preview=$(echo "$preview" | sed -e "s/###/'/g")
 
-		local header=("Repository: '$repo_name'" \
-			"Branch: '$branch_name'" \
+		local header=("Repository: '$repository'" \
+			"Branch: '$current_branch'" \
 			"-------------------" \
 			"Use [tab] key to select" \
 		)
@@ -349,6 +410,7 @@ add_override_command_git() {
 	if [[ "$commit_now" = true ]]; then
 		local commit_msg
 		read -p "Please enter commit message: " commit_msg
+		echo "Git Commit Message: $commit_msg"
 		commit_override_command_git	"$commit_msg"
 	fi
 }
@@ -356,52 +418,75 @@ add_override_command_git() {
 commit_override_command_git() {
 	echo "commit_override_command_git()"
 
-	eval "$(pathinfo_override_command_git)"
+	# eval "$(pathinfo_override_command_git)"
+	eval "$(pathinfo_override_command_git_from_json)"
 
-	local repo_name=""
-	local current_branch=""
+	declare -A config_files=()
+	declare -A data_json=()
+	declare -a data_files=("default_file" "repository_file" "temp_file") 
+	declare -a data_column=("ticket_format" "ticket_max" "ticket_prefix")
+
+	for item in "${data_files[@]}"; do
+		config_files[$item]="${pathinfo['settings_dir']}/${pathinfo["$item"]}"
+	done
+
+	local repository="${pathinfo['repository']}"
+	local current_branch="${pathinfo['branch']}"
+
+	if [ "$repository" = "" ]; then
+        echo "Current directory is not in any git repository."
+		return 1
+	fi
+
+    echo "Repository: '$repository'"
+	echo "Current Branch: '$current_branch'"
+
+	local config_file="${config_files['repository_file']}"
+	local temp_file="${config_files['temp_file']}"
+
+	declare -A json_file_data
+	get_json_data json_file_data --file:"$config_file"
+
+	for key2 in "${!json_file_data[@]}"; do
+		local value2="${json_file_data[$key2]}"
+		# echo "1: $key2: $value2"
+	done
+
+	for item in "${data_column[@]}"; do
+		data_json[$item]="${json_file_data["$item"]}"
+	done
+
+	cleanup_override_command_git_from_json
+	# ###############################################
 	local all_params="$*"
 	local msg="$(echo "$all_params")"
 
-    if ! repo_name=$(get_git_repo_name); then
-        echo "Current directory is not in any git repository."
-		return 1
-    else
-        echo "Repository: '$repo_name'"
-    fi
+	# local ticket_prefix="${pathinfo['ticket_prefix']}"
+	# local format_ticket="${pathinfo['format_ticket']}"
+	# local ticket_max="${pathinfo['ticket_max']}"
 
-	current_branch=$(git branch --show-current)
-	echo "Current Branch: '$current_branch'"
-	# branch_name="$(git branch --show-current)"
+	# local ticket_format="${pathinfo['ticket_format']}"
+	# local ticket_prefix_txt="${pathinfo['ticket_prefix_txt']}"
+	# local ticket_max_num="${pathinfo['ticket_max_num']}"
 
-	local default_file="${pathinfo['default_file']}"
-	local settings_dir="${pathinfo['settings_dir']}"
-
-	local ticket_prefix="${pathinfo['ticket_prefix']}"
-	local format_ticket="${pathinfo['format_ticket']}"
-	local ticket_max="${pathinfo['ticket_max']}"
-
-	local ticket_format="${pathinfo['ticket_format']}"
-	local ticket_prefix_txt="${pathinfo['ticket_prefix_txt']}"
-	local ticket_max_num="${pathinfo['ticket_max_num']}"
-
-	cleanup_override_command_git
+	# cleanup_override_command_git
 
 	local new_ticket_no=""
 	local has_ticket_no=false
+	local ticket_max="${data_json['ticket_max']}"
 
 	local current_ticket_no=$(echo "$current_branch" | \
 		awk -F'/' '{print $NF}' | \
-		grep -oE "$ticket_format")
+		grep -oE "${data_json['ticket_format']}")
 
     if [ -n "$current_ticket_no" ]; then
         # msg="$current_ticket_no: $(capitalize_first_letter "$all_params")"
 		echo "Ticket No: $current_ticket_no"
 		has_ticket_no=true
 	else
-		local pad_length=$((ticket_max_num - 1))
+		local pad_length=$((ticket_max - 1))
 		local default_ticket_no=1
-		new_ticket_no="${ticket_prefix_txt}-$(str_pad "" $pad_length "0")${default_ticket_no}"
+		new_ticket_no="${data_json['ticket_prefix']}-$(str_pad "" $pad_length "0")${default_ticket_no}"
 	fi
 
 	if [[ "$has_ticket_no" = false ]]; then
@@ -434,7 +519,7 @@ commit_override_command_git() {
         case "$commit_now" in
             [Yy]|[Yy][Ee][Ss])
                 echo "git commit -m \"$commit_msg\""
-                git commit -m "$commit_msg"
+                command git commit -m "$commit_msg"
 				break
 				;;
 			[Nn]|[Nn][Oo])
@@ -453,7 +538,7 @@ commit_override_command_git() {
 		read -p "Do you want to push changes you've made? (y/n) " push_now
 		case "$push_now" in
 			[Yy]|[Yy][Ee][Ss])
-				git push origin HEAD 
+				command git push origin HEAD 
 				break
 				;;
 			[Nn]|[Nn][Oo])
@@ -468,80 +553,80 @@ commit_override_command_git() {
 	done
 }
 
-add_default_setting_override_command_git() {
-	echo "add_default_setting_override_command_git()"
-	eval "$(pathinfo_override_command_git)"
+# add_default_setting_override_command_git() {
+# 	echo "add_default_setting_override_command_git()"
+# 	eval "$(pathinfo_override_command_git)"
 
-	local type="settings"
-	local settings_dir="${pathinfo['settings_dir']}"
+# 	local type="settings"
+# 	local settings_dir="${pathinfo['settings_dir']}"
 
-	local format_ticket="${pathinfo['default_file_format_ticket']}"
-	local ticket_prefix="${pathinfo['default_file_ticket_prefix']}"
-	local ticket_max="${pathinfo['default_file_ticket_max']}"
+# 	local format_ticket="${pathinfo['default_file_format_ticket']}"
+# 	local ticket_prefix="${pathinfo['default_file_ticket_prefix']}"
+# 	local ticket_max="${pathinfo['default_file_ticket_max']}"
 
-	cleanup_override_command_git
+# 	cleanup_override_command_git
 
-	add_to_temp "$type" "$format_ticket" "[[:alnum:]]{3,}-[0-9]{6}"
-	add_to_temp "$type" "$ticket_prefix" "DEV"
-	add_to_temp "$type" "$ticket_max" "6"
-}
+# 	add_to_temp "$type" "$format_ticket" "[[:alnum:]]{3,}-[0-9]{6}"
+# 	add_to_temp "$type" "$ticket_prefix" "DEV"
+# 	add_to_temp "$type" "$ticket_max" "6"
+# }
 
-add_custom_setting_override_command_git() {
-	# Todo: Fix variable naming
-	# ! To deprecate, causing to many files
-	echo "add_custom_setting_override_command_git()"
-	eval "$(pathinfo_override_command_git)"
+# add_custom_setting_override_command_git() {
+# 	# Todo: Fix variable naming
+# 	# ! To deprecate, causing to many files
+# 	echo "add_custom_setting_override_command_git()"
+# 	eval "$(pathinfo_override_command_git)"
 
-	local type="settings"
-	local settings_dir="${pathinfo['settings_dir']}"
+# 	local type="settings"
+# 	local settings_dir="${pathinfo['settings_dir']}"
 
-	local format_ticket="${pathinfo['file_format_ticket']}"
-	local ticket_prefix="${pathinfo['file_ticket_prefix']}"
-	local ticket_max="${pathinfo['file_ticket_max']}"
+# 	local format_ticket="${pathinfo['file_format_ticket']}"
+# 	local ticket_prefix="${pathinfo['file_ticket_prefix']}"
+# 	local ticket_max="${pathinfo['file_ticket_max']}"
 
-	local default_ticket_format="${pathinfo['default_ticket_format']}"
-	local default_ticket_prefix="${pathinfo['default_ticket_prefix']}"
-	local default_ticket_max="${pathinfo['default_ticket_max']}"
-	local repository="${pathinfo['repository']}"
+# 	local default_ticket_format="${pathinfo['default_ticket_format']}"
+# 	local default_ticket_prefix="${pathinfo['default_ticket_prefix']}"
+# 	local default_ticket_max="${pathinfo['default_ticket_max']}"
+# 	local repository="${pathinfo['repository']}"
 	
-	cleanup_override_command_git
+# 	cleanup_override_command_git
 
-	if [ ! -f "${settings_dir}/${format_ticket}" ]; then
-		local ask1
-		local new_format_ticket="$default_ticket_format"
-		read -p "Format ticket settings not found for repository '$repository'. \
-					Creating file. What would be the format (default: '$default_ticket_format')? " ask1
+# 	if [ ! -f "${settings_dir}/${format_ticket}" ]; then
+# 		local ask1
+# 		local new_format_ticket="$default_ticket_format"
+# 		read -p "Format ticket settings not found for repository '$repository'. \
+# 					Creating file. What would be the format (default: '$default_ticket_format')? " ask1
 
-		if [ -n "$ask1" ]; then
-			new_format_ticket="$ask1"
-		fi
+# 		if [ -n "$ask1" ]; then
+# 			new_format_ticket="$ask1"
+# 		fi
 
-		add_to_temp "$type" "$format_ticket" "$new_format_ticket"
-	fi
+# 		add_to_temp "$type" "$format_ticket" "$new_format_ticket"
+# 	fi
 
-	if [ ! -f "${settings_dir}/${ticket_prefix}" ]; then
-		local ask2
-		local new_ticket_prefix="$default_ticket_prefix"
-		read -p "Ticket prefix settings not found for repository '$repository'. \
-					What would be the ticket prefix (default: '$default_ticket_prefix')? " ask2
+# 	if [ ! -f "${settings_dir}/${ticket_prefix}" ]; then
+# 		local ask2
+# 		local new_ticket_prefix="$default_ticket_prefix"
+# 		read -p "Ticket prefix settings not found for repository '$repository'. \
+# 					What would be the ticket prefix (default: '$default_ticket_prefix')? " ask2
 
-		if [ -n "$ask2" ]; then
-			new_ticket_prefix="$ask2"
-		fi
+# 		if [ -n "$ask2" ]; then
+# 			new_ticket_prefix="$ask2"
+# 		fi
 		
-		add_to_temp "$type" "$ticket_prefix" "$new_ticket_prefix"
-	fi
+# 		add_to_temp "$type" "$ticket_prefix" "$new_ticket_prefix"
+# 	fi
 
-	if [ ! -f "${settings_dir}/${ticket_max}" ]; then
-		local ask3
-		local new_ticket_max="$default_ticket_max"
-		read -p "Ticket max settings not found for repository '$repository'. \
-					What would be ticket max (default: '$default_ticket_max')? " ask3
+# 	if [ ! -f "${settings_dir}/${ticket_max}" ]; then
+# 		local ask3
+# 		local new_ticket_max="$default_ticket_max"
+# 		read -p "Ticket max settings not found for repository '$repository'. \
+# 					What would be ticket max (default: '$default_ticket_max')? " ask3
 
-		if [ -n "$ask3" ]; then
-			new_ticket_max="$ask2"
-		fi
+# 		if [ -n "$ask3" ]; then
+# 			new_ticket_max="$ask2"
+# 		fi
 		
-		add_to_temp "$type" "$ticket_max" "$new_ticket_max"
-	fi
-}
+# 		add_to_temp "$type" "$ticket_max" "$new_ticket_max"
+# 	fi
+# }
