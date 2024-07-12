@@ -455,7 +455,7 @@ commit_override_command_git() {
 	for item in "${data_column[@]}"; do
 		data_json[$item]="${json_file_data["$item"]}"
 	done
-
+	# return
 	cleanup_override_command_git_from_json
 	# ###############################################
 	local all_params="$*"
@@ -473,20 +473,21 @@ commit_override_command_git() {
 
 	local new_ticket_no=""
 	local has_ticket_no=false
-	local ticket_max="${data_json['ticket_max']}"
+	local ticket_max="${json_file_data['ticket_max']}"
 
 	local current_ticket_no=$(echo "$current_branch" | \
 		awk -F'/' '{print $NF}' | \
-		grep -oE "${data_json['ticket_format']}")
+		grep -oE "${json_file_data['ticket_format']}")
 
     if [ -n "$current_ticket_no" ]; then
         # msg="$current_ticket_no: $(capitalize_first_letter "$all_params")"
 		echo "Ticket No: $current_ticket_no"
 		has_ticket_no=true
 	else
+		echo "ticket_max: $ticket_max"
 		local pad_length=$((ticket_max - 1))
 		local default_ticket_no=1
-		new_ticket_no="${data_json['ticket_prefix']}-$(str_pad "" $pad_length "0")${default_ticket_no}"
+		new_ticket_no="${json_file_data['ticket_prefix']}-$(str_pad "" $pad_length "0")${default_ticket_no}"
 	fi
 
 	if [[ "$has_ticket_no" = false ]]; then
