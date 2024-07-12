@@ -484,7 +484,6 @@ commit_override_command_git() {
 		echo "Ticket No: $current_ticket_no"
 		has_ticket_no=true
 	else
-		echo "ticket_max: $ticket_max"
 		local pad_length=$((ticket_max - 1))
 		local default_ticket_no=1
 		new_ticket_no="${json_file_data['ticket_prefix']}-$(str_pad "" $pad_length "0")${default_ticket_no}"
