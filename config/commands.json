@@ -184,10 +184,10 @@
             "description": "Testing only 1"
         },
         {
-            "command": "s",
-            "alias": "spinner",
+            "command": "rdl",
+            "alias": "random_loading_indicator",
             "group": "misc",
-            "description": "Spinner"
+            "description": "Random loading indicators"
         }
     ]
 }
