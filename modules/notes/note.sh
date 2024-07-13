@@ -78,7 +78,17 @@ list_notes() {
     local counter=1
     local formatted_files=()
     local list=$(find "$search_dir" -maxdepth 1 -type f -name "*.txt" | sort -r)
+    local count_list=0
     local formatted_search_dir=$(printf '%s\n' "$search_dir" | sed -e 's/[\/&]/\\&/g')
+
+    if [ -n "$list" ]; then
+        count_list=$(echo "$list" | wc -l)
+    fi
+
+    if [ "$count_list" -eq 0 ]; then
+        echo "Notes have no content"
+        return 1
+    fi
 
     IFS=$'\n' read -r -d '' -a files <<< "$list"
 
