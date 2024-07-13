@@ -205,7 +205,9 @@ list_notes() {
                 #     awk -F'|' -v search_dir="$search_dir" '{print search_dir "/" $2 ".txt"}' | \
                 #     nl -w2 -s'. '
                 declare -a for_deletion=()
+                local counter_delete=0
                 while IFS= read -r option; do
+                    ((counter_delete++))
                     local filename
                     local selected_date="$(echo "$option" | cut -d "|" -f2)"
                     local selected_file_format=$(echo "$option" | cut -d "|" -f4 );
@@ -219,7 +221,7 @@ list_notes() {
 
                     filename="$search_dir/${filename}.txt"
                     for_deletion+=("$filename")
-                    echo "$filename"
+                    echo "$counter_delete. $filename"
                 done <<< "$selected_options"
 
                 read -p "Are you sure you want to delete files above? [y/N] " answer
@@ -312,4 +314,3 @@ open_note() {
         ;;
     esac
 }
-
