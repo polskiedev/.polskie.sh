@@ -8,7 +8,7 @@
             "description": "Deploy devenv repository"
         },
         {
-            "command": "note:create",
+            "command": "note:modify",
             "alt_command": "n",
             "alias": "open_note",
             "group": "Notes",
