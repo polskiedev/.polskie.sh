@@ -1,5 +1,63 @@
 #!/bin/bash
 
+notes_main() {
+    # local action="open"
+    declare -A result
+    declare -a remaining_parameters
+    local requested_vars=("action")
+    local args=("$@")
+    
+    process_args result remaining_parameters requested_vars[@] "${args[@]}"
+
+    # if [[ "${result["action"]}" != false ]]; then
+    #     action="${result["action"]}"
+    # fi
+    # ###############################################
+	declare -A options=()
+	options["open"]="Create/Update"
+    options["open_tomorrow"]="Create/Update (Tomorrow)"
+	options["list"]="List"
+	options["delete"]="Delete"
+
+    local default_tag="daily-scrum"
+    local default_choice="Create/Update"
+    default_choice=""
+
+	# Transform the associative array into the desired format
+	formatted_options=()
+	for key in "${!options[@]}"; do
+		formatted_options+=("${key}:${options[$key]}")
+	done
+
+    selected_option=$(printf "%s\n" "${formatted_options[@]}" | fzf --query="$default_choice" --delimiter=":" --with-nth=2)
+	# Handle the selected option
+	if [[ -n "$selected_option" ]]; then
+        local predefined_output=$(echo "$selected_option" | cut -d: -f1)
+        case "$predefined_output" in
+            "open")
+                # echo "Open"
+                open_note --tag:"$default_tag"
+                ;;
+            "open_tomorrow")
+                # echo "open_tomorrow"
+                open_note --tag:"$default_tag" --days:+1
+                ;;
+            "list")
+                # echo "List"
+                list_notes --action:"open" --tag:"$default_tag"
+                ;;
+            "delete")
+                # echo "Delete"
+                list_notes --action:"delete" --tag:"$default_tag"
+                ;;
+            *)
+                echo "notes_main(): Invalid parameter action '$action'"
+                return 1
+                ;;
+        esac
+    fi
+}
+
 get_note_path() {
     local dest_path="$HOME/notes"
     echo "$dest_path"
