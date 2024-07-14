@@ -151,6 +151,13 @@
             "description": "Git push to origin head"
         },
         {
+            "command": "g:create_branch",
+            "alt_command": "g:cb",
+            "alias": "create_branch_override_command_git",
+            "group": "git",
+            "description": "Git create branch and switch immediately"
+        },
+        {
             "command": "g:add_repo_settings",
             "alt_command": "gars",
             "alias": "add_custom_setting_override_command_git",

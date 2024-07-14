@@ -108,6 +108,155 @@ dump_override_command_git() {
 	done
 }
 
+create_branch_override_command_git() {
+	eval "$(pathinfo_override_command_git_from_json)"
+	# ###############################################
+	declare -a data_files=("default_file" "repository_file" "temp_file")
+	declare -a data_column=("ticket_format" "ticket_max" "ticket_prefix")
+	declare -A config_files=()
+	for item in "${data_files[@]}"; do
+		config_files[$item]="${pathinfo['settings_dir']}/${pathinfo["$item"]}"
+	done
+
+	local config_file="${config_files['repository_file']}"
+    declare -A json_result2
+    get_json_data json_result2 --file:"$config_file"
+
+	# for item in "${data_column[@]}"; do
+	# 	data_json[$item]="${json_file_data["$item"]}"
+	# done
+	
+	local ticket_format="${json_result2['ticket_format']}"
+	local ticket_prefix="${json_result2['ticket_prefix']}"
+	# if [ ! -v 'json_result2[$key_previous_branch]' ]; then
+	# 	echo "Configuration '$key_previous_branch' not set on JSON file."
+	# 	return 1
+	# fi
+
+	local repository="${pathinfo['repository']}"
+	if [ "$repository" = "" ]; then
+        echo "Current directory is not in any git repository."
+		return 1
+	fi
+
+	cleanup_override_command_git_from_json
+
+	# ###############################################
+	declare -A options=()
+	options["bugfix"]="Bugfix"
+	options["hotfix"]="Hotfix"
+	options["improvement"]="Feature"
+
+	# Default choice
+	local default_choice="Feature| improvement/"
+	default_choice=""
+
+	# Transform the associative array into the desired format
+	formatted_options=()
+	for key in "${!options[@]}"; do
+		formatted_options+=("${options[$key]}| ${key}/")
+	done
+
+	# Use fzf to select from the list
+	selected_option=$(printf "%s\n" "${formatted_options[@]}" | fzf --query="$default_choice")
+
+	local branch_type=""
+	# Handle the selected option
+	if [[ -n "$selected_option" ]]; then
+		value="${selected_option%|*}"
+		key="${selected_option#*| }"
+		key="${key%/}"
+
+		if [ "$(strtolower "$value")" != "$key" ]; then
+			echo "Selected: $value ($key)"
+		else 
+			echo "Selected: $key"
+		fi
+		
+		branch_type="${key}"
+	else
+		echo "No option selected"
+		return 1
+	fi
+
+	local ticket_no
+	while true; do
+		local answer
+		local formatted_answer
+		
+		read -p "Enter ticker number (Prefix: '${ticket_prefix}', Format: ${ticket_format}): " answer
+
+		# Validate if the input is a number
+		if [[ "$answer" =~ ^[0-9]+$ ]]; then
+			answer="${ticket_prefix}-$answer"
+		fi
+
+		formatted_answer=$(echo "$answer" | \
+			awk -F'/' '{print $NF}' | \
+			grep -oE "$ticket_format")
+			
+		local count_error=0
+
+		if test "${answer#"$ticket_prefix"}" = "$answer"; then
+			((count_error++))
+			echo "'$answer' does not match the prefix pattern '$ticket_prefix'"
+		fi
+
+		if [ -n "$formatted_answer" ]; then
+			ticket_no="$formatted_answer"
+		else
+			((count_error++))
+			echo "'$answer' does not match the ticket format pattern '$ticket_format'"
+		fi
+		
+		if [ "$count_error" -eq 0 ]; then
+			break
+		else
+			echo "Errors: $count_error"
+		fi
+	done
+
+	# echo "ticket_no: $ticket_no"
+	local ticket_desc
+	read -p "Please enter a short description of the ticket? " ticket_desc
+
+	ticket_desc=$(slugify "$ticket_desc")
+	# echo "ticket_desc: $ticket_desc"
+
+	local branch_name="${branch_type}/${ticket_no}-${ticket_desc}"
+	while true; do
+		local create_now
+		local commit_msg="${current_ticket_no}: $(ucfirst "$msg")"
+		read -p "Are you okay with this branch name \"$branch_name\"? (y/n) " create_now
+
+        case "$create_now" in
+            [Yy]|[Yy][Ee][Ss])
+				# git checkout -b <branch_name>
+				# git switch -c <branch_name>
+
+				git switch -c "$branch_name"
+
+				# Check if the command was successful
+				if [[ $? -eq 0 ]]; then
+					echo "Successfully created and switched to branch '$branch_name'."
+				else
+					echo "Failed to create and switch to branch '$branch_name'."
+					return 1
+				fi
+				break
+				;;
+			[Nn]|[Nn][Oo])
+				echo "No problem!"
+				return 1
+				break
+				;;
+			*)
+				echo "Please enter yes or no."
+				;;
+		esac
+	done
+}
+
 override_command_git() {
 	echo "override_command_git()"
 	# ###############################################
@@ -415,6 +564,7 @@ add_override_command_git() {
 	fi
 }
 
+# Todo: Not currently validating ticket prefix
 commit_override_command_git() {
 	echo "commit_override_command_git()"
 
@@ -455,6 +605,8 @@ commit_override_command_git() {
 	for item in "${data_column[@]}"; do
 		data_json[$item]="${json_file_data["$item"]}"
 	done
+
+	local ticket_format="${data_json['ticket_format']}"
 	# return
 	cleanup_override_command_git_from_json
 	# ###############################################
@@ -465,7 +617,6 @@ commit_override_command_git() {
 	# local format_ticket="${pathinfo['format_ticket']}"
 	# local ticket_max="${pathinfo['ticket_max']}"
 
-	# local ticket_format="${pathinfo['ticket_format']}"
 	# local ticket_prefix_txt="${pathinfo['ticket_prefix_txt']}"
 	# local ticket_max_num="${pathinfo['ticket_max_num']}"
 
