@@ -208,6 +208,13 @@
             "alias": "create_symlink",
             "group": "misc",
             "description": "Creating Symlinks"
+        },
+        {
+            "command": "worker_tasks",
+            "alt_command": "wt", 
+            "alias": "worker_tasks_main",
+            "group": "misc",
+            "description": "Worker Tasks entry point"
         }
     ]
 }
