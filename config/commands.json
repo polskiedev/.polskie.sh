@@ -17,28 +17,28 @@
         {
             "command": "note:modify",
             "alt_command": "n",
-            "alias": "open_note --tag:daily-scrum",
+            "alias": "open_note --group:daily-scrum",
             "group": "Notes",
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
             "command": "note:t",
             "alt_command": "nt",
-            "alias": "open_note --days:+1 --tag:daily-scrum",
+            "alias": "open_note --days:+1 --group:daily-scrum",
             "group": "Notes",
             "description": "Add a note for tomorrow. (or Next day)"
         },
         {
             "command": "note:list",
             "alt_command": "nl",
-            "alias": "list_notes --action:open --tag:daily-scrum",
+            "alias": "list_notes --action:open --group:daily-scrum",
             "group": "Notes",
             "description": "List of available notes, chose what to open"
         },
         {
             "command": "note:delete",
             "alt_command": "nd",
-            "alias": "list_notes --action:delete --tag:daily-scrum",
+            "alias": "list_notes --action:delete --group:daily-scrum",
             "group": "Notes",
             "description": "Delete a chosen note"
         },

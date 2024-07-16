@@ -1,10 +1,50 @@
 #!/bin/bash
 
 notes_main() {
+    local directory="$(get_note_path)"
+    local formatted_directory=$(echo "$directory" | sed -e 's/[\/&]/\\&/g')
+    local default_group="daily-scrum"
+    local group="$default_group"
+    local list=()
+    if [[ ! -d "$directory" ]]; then
+        echo "Directory not found: $directory"
+        return 1
+    fi
+
+    # find "$directory" -maxdepth 1 -type d ! -path "$directory" | while IFS= read -r dir; do
+    #     dir=$(echo "$dir" | sed -e "s/$formatted_directory\///g")
+    #     list+=("$dir")
+    #     # echo "Found directory: $dir"
+    # done
+
+    for dir in $(find "$directory" -maxdepth 1 -type d ! -path "$directory"); do
+        dir=$(echo "$dir" | sed -e "s/$formatted_directory\///g")
+        list+=("$dir")
+        # echo "Found directory: $dir"
+    done
+
+    local selected_option=$(printf '%s\n' "${list[@]}" | \
+        fzf \
+        --prompt="Please select note group: " \
+        --query="$default_group"
+    )
+
+    if [[ -n "$selected_option" ]]; then
+        # echo "$selected_option"
+        notes_actions --group:"$selected_option"
+    else
+        echo "No file selected."
+    fi
+}
+
+notes_actions() {
+    local default_group="daily-scrum"
+    local group="$default_group"
+    # ###############################################
     # local action="open"
     declare -A result
     declare -a remaining_parameters
-    local requested_vars=("action")
+    local requested_vars=("action" "group")
     local args=("$@")
     
     process_args result remaining_parameters requested_vars[@] "${args[@]}"
@@ -12,6 +52,9 @@ notes_main() {
     # if [[ "${result["action"]}" != false ]]; then
     #     action="${result["action"]}"
     # fi
+    if [[ "${result["group"]}" != false ]]; then
+        group="${result["group"]}"
+    fi
     # ###############################################
 	declare -A options=()
 	options["open"]="Create/Update"
@@ -19,7 +62,6 @@ notes_main() {
 	options["list"]="List"
 	options["delete"]="Delete"
 
-    local default_tag="daily-scrum"
     local default_choice="Create/Update"
     default_choice=""
 
@@ -36,19 +78,19 @@ notes_main() {
         case "$predefined_output" in
             "open")
                 # echo "Open"
-                open_note --tag:"$default_tag"
+                open_note --group:"$default_group"
                 ;;
             "open_tomorrow")
                 # echo "open_tomorrow"
-                open_note --tag:"$default_tag" --days:+1
+                open_note --group:"$default_group" --days:+1
                 ;;
             "list")
                 # echo "List"
-                list_notes --action:"open" --tag:"$default_tag"
+                list_notes --action:"open" --group:"$default_group"
                 ;;
             "delete")
                 # echo "Delete"
-                list_notes --action:"delete" --tag:"$default_tag"
+                list_notes --action:"delete" --group:"$default_group"
                 ;;
             *)
                 echo "notes_main(): Invalid parameter action '$action'"
@@ -108,7 +150,7 @@ list_notes() {
     local action="open"
     declare -A result
     declare -a remaining_parameters
-    local requested_vars=("action" "tag")
+    local requested_vars=("action" "group")
     local args=("$@")
 
     process_args result remaining_parameters requested_vars[@] "${args[@]}"
@@ -123,9 +165,9 @@ list_notes() {
             ;;
     esac
 
-    if [[ "${result["tag"]}" != false ]]; then
-        tag="$(slugify "${result["tag"]}")"
-        search_dir+="/${tag}"
+    if [[ "${result["group"]}" != false ]]; then
+        group="$(slugify "${result["group"]}")"
+        search_dir+="/${group}"
     fi
 
     if [[ ! -d "$search_dir" ]]; then
@@ -248,8 +290,8 @@ list_notes() {
 
                 filename="${filename}.txt"
 
-                if [[ "${result["tag"]}" != false ]]; then
-                    open_note --filename:"$filename" --tag:"${result["tag"]}"
+                if [[ "${result["group"]}" != false ]]; then
+                    open_note --filename:"$filename" --group:"${result["group"]}"
                 else
                     open_note --filename:"$filename"
                 fi
@@ -309,7 +351,7 @@ open_note() {
 
     declare -A result
     declare -a remaining_parameters
-    local requested_vars=("showdata" "filename" "tag" "action")
+    local requested_vars=("showdata" "filename" "group" "action")
     local args=("$@")
 
     process_args result remaining_parameters requested_vars[@] "${args[@]}"
@@ -338,9 +380,9 @@ open_note() {
     create_directories "$dest_path"
 
     local file_path="$dest_path"
-    if [[ "${result["tag"]}" != false ]]; then
-        tag="$(slugify "${result["tag"]}")"
-        file_path+="/${tag}"
+    if [[ "${result["group"]}" != false ]]; then
+        group="$(slugify "${result["group"]}")"
+        file_path+="/${group}"
         create_directories "$file_path"
     fi
 
