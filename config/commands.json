@@ -202,6 +202,12 @@
             "alias": "random_loading_indicator",
             "group": "misc",
             "description": "Random loading indicators"
+        },
+        {
+            "command": "sym",
+            "alias": "create_symlink",
+            "group": "misc",
+            "description": "Creating Symlinks"
         }
     ]
 }
