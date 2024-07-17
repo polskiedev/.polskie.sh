@@ -108,6 +108,60 @@ dump_override_command_git() {
 	done
 }
 
+git_add_options_override_command_git() {
+	local default_choice=""
+	declare -A options=()
+	options["add_all"]="Git add all"
+	options["add_picked"]="Git pick then add"
+	options["create_branch"]="Create Branch"
+	options["ask_commit"]="Commit Changes"
+	options["status"]="Git status"
+	options["test"]="Test"
+
+	# Transform the associative array into the desired format
+	formatted_options=()
+	for key in "${!options[@]}"; do
+		formatted_options+=("${key}:${options[$key]}")
+	done
+
+	selected_option=$(printf "%s\n" "${formatted_options[@]}" | fzf --delimiter=":" --with-nth=2 --query="$default_choice")
+	if [[ -n "$selected_option" ]]; then
+        local predefined_output=$(echo "$selected_option" | cut -d: -f1)
+        case "$predefined_output" in
+            "add_all")
+				echo "Under maintenance: @add_all"
+				# add_override_command_git .
+				;;
+            "add_picked")
+				echo "Under maintenance: @add_picked"
+				# add_override_command_git
+				;;
+			"select")
+				echo "Under maintenance: @select"
+				# create_branch_override_command_git
+				;;
+			"status")
+				echo "Under maintenance: @status"
+				# status_override_command_git
+				;;
+			"ask_commit")
+				echo "Under maintenance: @ask_commit"
+				# ask_commit_override_command_git
+				;;
+			"test")
+				echo "Under maintenance: @test"
+				local msg
+				read -p "Please enter message: " msg
+				echo "Message: $msg"
+				;;
+            *)
+                echo "git_add_options_override_command_git(): Invalid parameter action '$predefined_output'"
+                return 1
+                ;;
+        esac
+	fi
+}
+
 create_branch_override_command_git() {
 	eval "$(pathinfo_override_command_git_from_json)"
 	# ###############################################
@@ -563,6 +617,14 @@ add_override_command_git() {
 		commit_override_command_git	"$commit_msg"
 	fi
 }
+
+# ask_commit_override_command_git() {
+# 	echo "ask_commit_override_command_git()"
+# 	local commit_msg
+# 	read -p "Please enter commit message: " commit_msg
+# 	echo "Git Commit Message: $commit_msg"
+# 	commit_override_command_git	"$commit_msg"
+# }
 
 # Todo: Not currently validating ticket prefix
 commit_override_command_git() {
