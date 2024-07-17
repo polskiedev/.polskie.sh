@@ -8,6 +8,12 @@
             "description": "Deploy devenv repository"
         },
         {
+            "command": "main",
+            "alias": "echo \"main()\"",
+            "group": "DevEnv",
+            "description": "Main entry point, used for keybinding [Alt+r] in bind.sh"
+        },
+        {
             "command": "note:main",
             "alt_command": "nm",
             "alias": "notes_main",
@@ -22,7 +28,7 @@
             "description": "Add a note for today if one doesn't already exist, or edit the existing note if it does."
         },
         {
-            "command": "note:t",
+            "command": "note:tomorrow",
             "alt_command": "nt",
             "alias": "open_note --days:+1 --group:daily-scrum",
             "group": "Notes",
