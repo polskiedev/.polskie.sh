@@ -6,7 +6,7 @@
 .example/
 .cache/
 .symlinks/
-.env/
+.env.local/
 .output/
 .tests/
 .shared/
@@ -25,8 +25,8 @@ submodules/
 *.private
 *.secure
 *.local
-*.env
+# *.env
 
-.env
+# .env
 .cache
 
