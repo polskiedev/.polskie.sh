@@ -108,7 +108,7 @@ dump_override_command_git() {
 	done
 }
 
-git_add_options_override_command_git() {
+git_actions_list_override_command_git() {
 	local default_choice=""
 	declare -A options=()
 	options["add_all"]="Git add all"
@@ -116,7 +116,9 @@ git_add_options_override_command_git() {
 	options["create_branch"]="Create Branch"
 	options["ask_commit"]="Commit Changes"
 	options["status"]="Git status"
-	options["test"]="Test"
+	options["add_default_config"]="Add default JSON configuration"
+	options["add_repository_config"]="Add repository JSON configuration"
+	# options["test"]="Test"
 
 	# Transform the associative array into the desired format
 	formatted_options=()
@@ -129,31 +131,32 @@ git_add_options_override_command_git() {
         local predefined_output=$(echo "$selected_option" | cut -d: -f1)
         case "$predefined_output" in
             "add_all")
-				echo "Under maintenance: @add_all"
-				# add_override_command_git .
+				add_override_command_git .
 				;;
             "add_picked")
-				echo "Under maintenance: @add_picked"
-				# add_override_command_git
+				add_override_command_git
 				;;
-			"select")
-				echo "Under maintenance: @select"
-				# create_branch_override_command_git
+			"create_branch")
+				create_branch_override_command_git
 				;;
 			"status")
-				echo "Under maintenance: @status"
-				# status_override_command_git
+				status_override_command_git
 				;;
 			"ask_commit")
-				echo "Under maintenance: @ask_commit"
-				# ask_commit_override_command_git
+				ask_commit_override_command_git
 				;;
-			"test")
-				echo "Under maintenance: @test"
-				local msg
-				read -p "Please enter message: " msg
-				echo "Message: $msg"
+			"add_default_config")
+				modify_config_file_override_command_git_from_json --config:repository
 				;;
+			"add_repository_config")
+				modify_config_file_override_command_git_from_json --config:default
+				;;
+			# "test")
+			# 	echo "Under maintenance: @test"
+			# 	local msg
+			# 	read -p "Please enter message: " msg
+			# 	echo "Message: $msg"
+			# 	;;
             *)
                 echo "git_add_options_override_command_git(): Invalid parameter action '$predefined_output'"
                 return 1
@@ -200,6 +203,7 @@ create_branch_override_command_git() {
 	options["bugfix"]="Bugfix"
 	options["hotfix"]="Hotfix"
 	options["improvement"]="Feature"
+	options["feature"]="Feature"
 
 	# Default choice
 	local default_choice="Feature| improvement/"
@@ -618,13 +622,13 @@ add_override_command_git() {
 	fi
 }
 
-# ask_commit_override_command_git() {
-# 	echo "ask_commit_override_command_git()"
-# 	local commit_msg
-# 	read -p "Please enter commit message: " commit_msg
-# 	echo "Git Commit Message: $commit_msg"
-# 	commit_override_command_git	"$commit_msg"
-# }
+ask_commit_override_command_git() {
+	echo "ask_commit_override_command_git()"
+	local commit_msg
+	read -p "Please enter commit message: " commit_msg
+	echo "Git Commit Message: $commit_msg"
+	commit_override_command_git	"$commit_msg"
+}
 
 # Todo: Not currently validating ticket prefix
 commit_override_command_git() {

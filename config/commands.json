@@ -129,6 +129,12 @@
             "description": "Git checkout"
         },
         {
+            "command": "g:actions",
+            "alias": "git_actions_list_override_command_git",
+            "group": "git",
+            "description": "Git actions list"
+        },
+        {
             "command": "g:fp",
             "alt_command": "gfp",
             "alias": "git fetch; git pull",
@@ -171,11 +177,18 @@
             "description": "Git create branch and switch immediately"
         },
         {
-            "command": "g:add_repo_settings",
-            "alt_command": "gars",
-            "alias": "add_custom_setting_override_command_git",
+            "command": "g:add_repository_config",
+            "alt_command": "garc",
+            "alias": "modify_config_file_override_command_git_from_json --config:repository",
             "group": "git",
-            "description": "Git push to origin head"
+            "description": "Add repository json configuration"
+        },
+        {
+            "command": "g:add_default_config",
+            "alt_command": "gadc",
+            "alias": "modify_config_file_override_command_git_from_json --config:default",
+            "group": "git",
+            "description": "Add default json configuration"
         },
         {
             "command": "git",
