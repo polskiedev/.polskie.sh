@@ -1,5 +1,6 @@
 #!/bin/bash
-
+# Todo:
+# - Make all git add to be base from repository base
 pathinfo_override_command_git() {
     declare -A pathinfo
 

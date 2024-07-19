@@ -13,6 +13,7 @@ pathinfo_override_command_git_from_json() {
     pathinfo["settings_dir"]="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
 	pathinfo["repository"]="$repo_name"
 	pathinfo["branch"]="$(git branch --show-current)"
+	pathinfo["repository_base_directory"]="$(git rev-parse --show-toplevel)"
 
 	pathinfo["default_ticket_format"]="[[:alnum:]]{3,}-[0-9]{6}"
 	pathinfo["default_ticket_prefix"]="DEV"
