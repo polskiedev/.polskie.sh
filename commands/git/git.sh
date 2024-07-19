@@ -191,6 +191,7 @@ create_branch_override_command_git() {
 	# fi
 
 	local repository="${pathinfo['repository']}"
+	local current_branch="${pathinfo['branch']}"
 	if [ "$repository" = "" ]; then
         echo "Current directory is not in any git repository."
 		return 1
@@ -199,6 +200,25 @@ create_branch_override_command_git() {
 	cleanup_override_command_git_from_json
 
 	# ###############################################
+	while true; do
+		local is_base_branch_ok
+		read -p "Are you want to create a new branch based from \`${repository}\`.\`$current_branch\`? (y/n) " is_base_branch_ok
+
+        case "$good_base_branch" in
+            [Yy]|[Yy][Ee][Ss])
+				break
+				;;
+			[Nn]|[Nn][Oo])
+				echo "No problem!"
+				return 1
+				break
+				;;
+			*)
+				echo "Please enter yes or no."
+				;;
+		esac
+	done
+	# ###############################################
 	declare -A options=()
 	options["bugfix"]="Bugfix"
 	options["hotfix"]="Hotfix"
@@ -206,8 +226,7 @@ create_branch_override_command_git() {
 	options["feature"]="Feature"
 
 	# Default choice
-	local default_choice="Feature| improvement/"
-	default_choice=""
+	local default_choice=""
 
 	# Transform the associative array into the desired format
 	formatted_options=()
