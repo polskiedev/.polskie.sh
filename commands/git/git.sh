@@ -642,7 +642,6 @@ add_override_command_git() {
 	fi
 }
 
-# Todo: Not currently validating ticket prefix
 commit_override_command_git() {
 	echo "commit_override_command_git()"
 	# ###############################################
@@ -735,35 +734,38 @@ commit_override_command_git() {
 			local formatted_answer
 			read -p "Enter ticker number (default: $new_ticket_no): " answer
 
-			# Validate if the input is a number
-			if [[ "$answer" =~ ^[0-9]+$ ]]; then
-				answer="$ticket_prefix-$(str_pad "" $pad_length "0")${answer}"
-			fi
-
-			formatted_answer=$(echo "$answer" | \
-				awk -F'/' '{print $NF}' | \
-				grep -oE "$ticket_format")
-			
-			local count_error=0
-
-			if test "${answer#"$ticket_prefix"}" = "$answer"; then
-				((count_error++))
-				echo "'$answer' does not match the prefix pattern '$ticket_prefix'"
-			fi
-				
 			if [ -z "$answer" ]; then
 				current_ticket_no="$new_ticket_no"
-			elif [ -n "$formatted_answer" ]; then
-				current_ticket_no="$formatted_answer"
-			else
-				((count_error++))
-				echo "'$answer' does not match the ticket format pattern '$ticket_format'"
-			fi
-
-			if [ "$count_error" -eq 0 ]; then
 				break
 			else
-				echo "Errors: $count_error"
+				# Validate if the input is a number
+				if [[ "$answer" =~ ^[0-9]+$ ]]; then
+					answer="$ticket_prefix-$(str_pad "" $pad_length "0")${answer}"
+				fi
+
+				formatted_answer=$(echo "$answer" | \
+					awk -F'/' '{print $NF}' | \
+					grep -oE "$ticket_format")
+				
+				local count_error=0
+
+				if test "${answer#"$ticket_prefix"}" = "$answer"; then
+					((count_error++))
+					echo "'$answer' does not match the prefix pattern '$ticket_prefix'"
+				fi
+					
+				if [ -n "$formatted_answer" ]; then
+					current_ticket_no="$formatted_answer"
+				else
+					((count_error++))
+					echo "'$answer' does not match the ticket format pattern '$ticket_format'"
+				fi
+
+				if [ "$count_error" -eq 0 ]; then
+					break
+				else
+					echo "Errors: $count_error"
+				fi
 			fi
 		done
 	fi
