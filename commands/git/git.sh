@@ -507,6 +507,7 @@ add_override_command_git() {
     fi
 	# ###############################################
 	local repository="${pathinfo['repository']}"
+	local repository_base_directory="${pathinfo['repository_base_directory']}"
 	local current_branch="${pathinfo['branch']}"
 	cleanup_override_command_git_from_json
 	# ###############################################
@@ -603,7 +604,7 @@ add_override_command_git() {
 			local filename="$(echo "$item" | cut -d"|" -f3 | trim)"
 			
 			if [[ -n "$filename" ]]; then
-				if git add "$filename"; then
+				if git add "$repository_base_directory/$filename"; then
 					log_success "Added '$filename' to git"
 					((git_added++))
 				else
