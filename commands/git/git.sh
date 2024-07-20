@@ -1,80 +1,80 @@
 #!/bin/bash
 # Todo:
 # - Make all git add to be base from repository base
-pathinfo_override_command_git() {
-    declare -A pathinfo
+# pathinfo_override_command_git() {
+#     declare -A pathinfo
 
-    pathinfo["settings_dir"]="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
-    pathinfo["default_file"]="default"
-	pathinfo["format_ticket"]=".format_ticket"
-	pathinfo["ticket_prefix"]=".ticket_prefix"
-	pathinfo["ticket_max"]=".ticket_max"
+#     pathinfo["settings_dir"]="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
+#     pathinfo["default_file"]="default"
+# 	pathinfo["format_ticket"]=".format_ticket"
+# 	pathinfo["ticket_prefix"]=".ticket_prefix"
+# 	pathinfo["ticket_max"]=".ticket_max"
 	
-	local repo_name=$(get_git_repo_name)
+# 	local repo_name=$(get_git_repo_name)
 
-	local default_file="${pathinfo['default_file']}"
-	local settings_dir="${pathinfo['settings_dir']}"
+# 	local default_file="${pathinfo['default_file']}"
+# 	local settings_dir="${pathinfo['settings_dir']}"
 
-	local ticket_prefix="${pathinfo['ticket_prefix']}"
-	local format_ticket="${pathinfo['format_ticket']}"
-	local ticket_max="${pathinfo['ticket_max']}"
+# 	local ticket_prefix="${pathinfo['ticket_prefix']}"
+# 	local format_ticket="${pathinfo['format_ticket']}"
+# 	local ticket_max="${pathinfo['ticket_max']}"
 
-	local default_file_format_ticket="${default_file}${format_ticket}.txt"
-	local default_file_ticket_prefix="${default_file}${ticket_prefix}.txt"
-	local default_file_ticket_max="${default_file}${ticket_max}.txt"
+# 	local default_file_format_ticket="${default_file}${format_ticket}.txt"
+# 	local default_file_ticket_prefix="${default_file}${ticket_prefix}.txt"
+# 	local default_file_ticket_max="${default_file}${ticket_max}.txt"
 
-	local file_format_ticket="${repo_name}${format_ticket}.txt"
-	local file_ticket_prefix="${repo_name}${ticket_prefix}.txt"
-	local file_ticket_max="${repo_name}${ticket_max}.txt"
+# 	local file_format_ticket="${repo_name}${format_ticket}.txt"
+# 	local file_ticket_prefix="${repo_name}${ticket_prefix}.txt"
+# 	local file_ticket_max="${repo_name}${ticket_max}.txt"
 
-	local ticket_format=""
-	local ticket_prefix_txt=""
-	local ticket_max_num=0
+# 	local ticket_format=""
+# 	local ticket_prefix_txt=""
+# 	local ticket_max_num=0
 
-	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-	# This block is using the old txt file method of saving settings @Start
-	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-	if [ -f "${settings_dir}/${file_format_ticket}" ]; then
-		ticket_format=$(head -n 1 "${settings_dir}/${file_format_ticket}")
-	elif [ -f "${settings_dir}/${default_file_format_ticket}" ]; then
-		ticket_format=$(head -n 1 "${settings_dir}/${default_file_format_ticket}")
-	fi
+# 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# 	# This block is using the old txt file method of saving settings @Start
+# 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# 	if [ -f "${settings_dir}/${file_format_ticket}" ]; then
+# 		ticket_format=$(head -n 1 "${settings_dir}/${file_format_ticket}")
+# 	elif [ -f "${settings_dir}/${default_file_format_ticket}" ]; then
+# 		ticket_format=$(head -n 1 "${settings_dir}/${default_file_format_ticket}")
+# 	fi
 
-	if [ -f "${settings_dir}/${file_ticket_prefix}" ]; then
-		ticket_prefix_txt=$(head -n 1 "${settings_dir}/${file_ticket_prefix}")
-	elif [ -f "${settings_dir}/${default_file_ticket_prefix}" ]; then
-		ticket_prefix_txt=$(head -n 1 "${settings_dir}/${default_file_ticket_prefix}")
-	fi
+# 	if [ -f "${settings_dir}/${file_ticket_prefix}" ]; then
+# 		ticket_prefix_txt=$(head -n 1 "${settings_dir}/${file_ticket_prefix}")
+# 	elif [ -f "${settings_dir}/${default_file_ticket_prefix}" ]; then
+# 		ticket_prefix_txt=$(head -n 1 "${settings_dir}/${default_file_ticket_prefix}")
+# 	fi
 
-	if [ -f "${settings_dir}/${file_ticket_max}" ]; then
-		ticket_max_num=$(head -n 1 "${settings_dir}/${file_ticket_max}")
-	elif [ -f "${settings_dir}/${default_file_ticket_max}" ]; then
-		ticket_max_num=$(head -n 1 "${settings_dir}/${default_file_ticket_max}")
-	fi
-	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
-	# This block is using the old txt file method of saving settings @End
-	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# 	if [ -f "${settings_dir}/${file_ticket_max}" ]; then
+# 		ticket_max_num=$(head -n 1 "${settings_dir}/${file_ticket_max}")
+# 	elif [ -f "${settings_dir}/${default_file_ticket_max}" ]; then
+# 		ticket_max_num=$(head -n 1 "${settings_dir}/${default_file_ticket_max}")
+# 	fi
+# 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# 	# This block is using the old txt file method of saving settings @End
+# 	# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-	pathinfo["ticket_format"]="$ticket_format"
-	pathinfo["ticket_prefix_txt"]="$ticket_prefix_txt"
-	pathinfo["ticket_max_num"]=$ticket_max_num
-	pathinfo["repository"]=$repo_name
+# 	pathinfo["ticket_format"]="$ticket_format"
+# 	pathinfo["ticket_prefix_txt"]="$ticket_prefix_txt"
+# 	pathinfo["ticket_max_num"]=$ticket_max_num
+# 	pathinfo["repository"]=$repo_name
 
-	pathinfo["default_file_format_ticket"]=$default_file_format_ticket
-	pathinfo["default_file_ticket_prefix"]=$default_file_ticket_prefix
-	pathinfo["default_file_ticket_max"]=$default_file_ticket_max
+# 	pathinfo["default_file_format_ticket"]=$default_file_format_ticket
+# 	pathinfo["default_file_ticket_prefix"]=$default_file_ticket_prefix
+# 	pathinfo["default_file_ticket_max"]=$default_file_ticket_max
 
-	pathinfo["file_format_ticket"]=$file_format_ticket
-	pathinfo["file_ticket_prefix"]=$file_ticket_prefix
-	pathinfo["file_ticket_max"]=$file_ticket_max
+# 	pathinfo["file_format_ticket"]=$file_format_ticket
+# 	pathinfo["file_ticket_prefix"]=$file_ticket_prefix
+# 	pathinfo["file_ticket_max"]=$file_ticket_max
 
-	pathinfo["default_ticket_format"]="[[:alnum:]]{3,}-[0-9]{6}"
-	pathinfo["default_ticket_prefix"]="DEV"
-	pathinfo["default_ticket_max"]="6"
+# 	pathinfo["default_ticket_format"]="[[:alnum:]]{3,}-[0-9]{6}"
+# 	pathinfo["default_ticket_prefix"]="DEV"
+# 	pathinfo["default_ticket_max"]="6"
 
-    # Return associative array
-    echo "$(declare -p pathinfo)"
-}
+#     # Return associative array
+#     echo "$(declare -p pathinfo)"
+# }
 
 cleanup_override_command_git() {
     # Unset the array, to prevent leakage
@@ -115,7 +115,7 @@ git_actions_list_override_command_git() {
 	options["add_all"]="Git add all"
 	options["add_picked"]="Git pick then add"
 	options["create_branch"]="Create Branch"
-	options["ask_commit"]="Commit Changes"
+	options["commit"]="Commit Changes"
 	options["status"]="Git status"
 	options["add_default_config"]="Add default JSON configuration"
 	options["add_repository_config"]="Add repository JSON configuration"
@@ -143,8 +143,8 @@ git_actions_list_override_command_git() {
 			"status")
 				status_override_command_git
 				;;
-			"ask_commit")
-				ask_commit_override_command_git
+			"commit")
+				commit_override_command_git
 				;;
 			"add_default_config")
 				modify_config_file_override_command_git_from_json --config:repository
@@ -642,18 +642,23 @@ add_override_command_git() {
 	fi
 }
 
-ask_commit_override_command_git() {
-	echo "ask_commit_override_command_git()"
-	local commit_msg
-	read -p "Please enter commit message: " commit_msg
-	echo "Git Commit Message: $commit_msg"
-	commit_override_command_git	"$commit_msg"
-}
-
 # Todo: Not currently validating ticket prefix
 commit_override_command_git() {
 	echo "commit_override_command_git()"
+	# ###############################################
+	local all_params="$*"
+	local msg="$(echo "$all_params")"
 
+	while true; do
+		if [ "$msg" = "" ]; then
+			local read_msg
+			read -p "Please enter commit message: " read_msg
+			msg="$read_msg"
+		else
+			break
+		fi
+	done
+	# ###############################################
 	# eval "$(pathinfo_override_command_git)"
 	eval "$(pathinfo_override_command_git_from_json)"
 
@@ -696,8 +701,6 @@ commit_override_command_git() {
 	# return
 	cleanup_override_command_git_from_json
 	# ###############################################
-	local all_params="$*"
-	local msg="$(echo "$all_params")"
 
 	# local ticket_prefix="${pathinfo['ticket_prefix']}"
 	# local format_ticket="${pathinfo['format_ticket']}"
@@ -711,7 +714,9 @@ commit_override_command_git() {
 	local new_ticket_no=""
 	local has_ticket_no=false
 	local ticket_max="${json_file_data['ticket_max']}"
-
+	local ticket_prefix="${json_file_data['ticket_prefix']}"
+	local pad_length=$((ticket_max - 1))
+	local default_ticket_no=1
 	local current_ticket_no=$(echo "$current_branch" | \
 		awk -F'/' '{print $NF}' | \
 		grep -oE "${json_file_data['ticket_format']}")
@@ -721,9 +726,7 @@ commit_override_command_git() {
 		echo "Ticket No: $current_ticket_no"
 		has_ticket_no=true
 	else
-		local pad_length=$((ticket_max - 1))
-		local default_ticket_no=1
-		new_ticket_no="${json_file_data['ticket_prefix']}-$(str_pad "" $pad_length "0")${default_ticket_no}"
+		new_ticket_no="$ticket_prefix-$(str_pad "" $pad_length "0")${default_ticket_no}"
 	fi
 
 	if [[ "$has_ticket_no" = false ]]; then
@@ -732,18 +735,35 @@ commit_override_command_git() {
 			local formatted_answer
 			read -p "Enter ticker number (default: $new_ticket_no): " answer
 
+			# Validate if the input is a number
+			if [[ "$answer" =~ ^[0-9]+$ ]]; then
+				answer="$ticket_prefix-$(str_pad "" $pad_length "0")${answer}"
+			fi
+
 			formatted_answer=$(echo "$answer" | \
 				awk -F'/' '{print $NF}' | \
 				grep -oE "$ticket_format")
+			
+			local count_error=0
+
+			if test "${answer#"$ticket_prefix"}" = "$answer"; then
+				((count_error++))
+				echo "'$answer' does not match the prefix pattern '$ticket_prefix'"
+			fi
 				
 			if [ -z "$answer" ]; then
 				current_ticket_no="$new_ticket_no"
-				break
 			elif [ -n "$formatted_answer" ]; then
 				current_ticket_no="$formatted_answer"
+			else
+				((count_error++))
+				echo "'$answer' does not match the ticket format pattern '$ticket_format'"
+			fi
+
+			if [ "$count_error" -eq 0 ]; then
 				break
 			else
-				echo "'$answer' doesn't match with the required ticket pattern."
+				echo "Errors: $count_error"
 			fi
 		done
 	fi
