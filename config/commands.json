@@ -108,6 +108,13 @@
             "description": "Go to a directory in cd list"
         },
         {
+            "command": "g:actions",
+            "alt_command": "g",
+            "alias": "git_actions_list_override_command_git",
+            "group": "git",
+            "description": "Git actions list"
+        },
+        {
             "command": "g:add",
             "alt_command": "ga",
             "alias": "add_override_command_git",
@@ -127,12 +134,6 @@
             "alias": "override_command_git checkout",
             "group": "git",
             "description": "Git checkout"
-        },
-        {
-            "command": "g:actions",
-            "alias": "git_actions_list_override_command_git",
-            "group": "git",
-            "description": "Git actions list"
         },
         {
             "command": "g:fp",
