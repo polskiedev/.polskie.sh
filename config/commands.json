@@ -193,7 +193,6 @@
         },
         {
             "command": "git",
-            "alt_command": "g",
             "alias": "override_command_git",
             "group": "git",
             "description": "Git override command"

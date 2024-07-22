@@ -128,6 +128,12 @@ git_actions_list_override_command_git() {
 	done
 
 	selected_option=$(printf "%s\n" "${formatted_options[@]}" | fzf --delimiter=":" --with-nth=2 --query="$default_choice")
+
+	if [ -z "$selected_option" ]; then
+		log_info "No item selected."
+		return 1
+	fi	
+
 	if [[ -n "$selected_option" ]]; then
         local predefined_output=$(echo "$selected_option" | cut -d: -f1)
         case "$predefined_output" in
