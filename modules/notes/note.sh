@@ -30,7 +30,7 @@ notes_main() {
     )
 
     if [[ -n "$selected_option" ]]; then
-        # echo "$selected_option"
+        echo "notes_actions --group:\"$selected_option\""
         notes_actions --group:"$selected_option"
     else
         echo "No file selected."
@@ -78,19 +78,19 @@ notes_actions() {
         case "$predefined_output" in
             "open")
                 # echo "Open"
-                open_note --group:"$default_group"
+                open_note --group:"$group"
                 ;;
             "open_tomorrow")
                 # echo "open_tomorrow"
-                open_note --group:"$default_group" --days:+1
+                open_note --group:"$group" --days:+1
                 ;;
             "list")
                 # echo "List"
-                list_notes --action:"open" --group:"$default_group"
+                list_notes --action:"open" --group:"$group"
                 ;;
             "delete")
                 # echo "Delete"
-                list_notes --action:"delete" --group:"$default_group"
+                list_notes --action:"delete" --group:"$group"
                 ;;
             *)
                 echo "notes_main(): Invalid parameter action '$action'"
