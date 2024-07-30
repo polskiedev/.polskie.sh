@@ -211,7 +211,7 @@ create_branch_override_command_git() {
 		local is_base_branch_ok
 		read -p "Are you want to create a new branch based from \`${repository}\`.\`$current_branch\`? (y/n) " is_base_branch_ok
 
-        case "$good_base_branch" in
+        case "$is_base_branch_ok" in
             [Yy]|[Yy][Ee][Ss])
 				break
 				;;
