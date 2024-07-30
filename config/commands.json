@@ -14,8 +14,8 @@
             "description": "Main entry point, used for keybinding [Alt+r] in bind.sh"
         },
         {
-            "command": "note:main",
-            "alt_command": "nm",
+            "command": "note:actions",
+            "alt_command": "n:a",
             "alias": "notes_main",
             "group": "Notes",
             "description": "Notes entry point"
