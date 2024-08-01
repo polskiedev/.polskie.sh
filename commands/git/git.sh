@@ -236,7 +236,7 @@ create_branch_override_command_git() {
 	if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
 		local other_working_directory=$(git rev-parse --show-toplevel)
 		current_repo_config_ticket_types="$other_working_directory/$ENV_THIRD_PARTY_WORKING_DIRECTORY/config/$config_file_ticket_types"
-		current_repo_config_ticket_types2="$other_working_directory/$ENV_THIRD_PARTY_WORKING_DIRECTORY/config/ticket_types/$(basename "$other_working_directory").json"
+		current_repo_config_ticket_types2="$other_working_directory/$ENV_THIRD_PARTY_WORKING_DIRECTORY/config/$config_file_ticket_types/$(basename "$other_working_directory").json"
 	fi
 
 	if [ -f "$current_repo_config_ticket_types" ] && [ "$has_ticket_type" = false ]; then
