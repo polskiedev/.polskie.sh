@@ -227,10 +227,41 @@ create_branch_override_command_git() {
 	done
 	# ###############################################
 	declare -A options=()
-	options["bugfix"]="Bugfix"
-	options["hotfix"]="Hotfix"
-	options["improvement"]="Feature"
-	options["feature"]="Feature"
+	local config_file_ticket_types="ticket_types.json"
+	local default_config_ticket_types="$PATH_POLSKIE_SH/config/$config_file_ticket_types"
+	local current_repo_config_ticket_types=""
+	local has_ticket_type=false
+
+	if git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
+		local other_working_directory=$(git rev-parse --show-toplevel)
+		current_repo_config_ticket_types="$other_working_directory/$ENV_THIRD_PARTY_WORKING_DIRECTORY/config/$config_file_ticket_types"
+	fi
+
+	if [ -f "$current_repo_config_ticket_types" ] && [ "$has_ticket_type" = false ]; then
+		has_ticket_type=true
+		mapfile -t json_objects < <(jq -c '.ticket_types[] | select(.active == 1)' "$current_repo_config_ticket_types")
+	fi
+
+	if [ -f "$default_config_ticket_types" ] && [ "$has_ticket_type" = false ]; then
+		has_ticket_type=true
+		mapfile -t json_objects < <(jq -c '.ticket_types[] | select(.active == 1)' "$default_config_ticket_types")
+	fi
+
+	if [ "$has_ticket_type" = true ]; then
+		# Loop through each JSON object in the array
+		for json_object in "${json_objects[@]}"; do
+			key=$(echo "$json_object" | jq -r '.key')
+			label=$(echo "$json_object" | jq -r '.label')
+			options["$key"]="$label"
+			# echo "$key: $label"
+		done
+	fi
+	# ###############################################
+	# declare -A options=()
+	# options["bugfix"]="Bugfix"
+	# options["hotfix"]="Hotfix"
+	# options["improvement"]="Feature"
+	# options["feature"]="Feature"
 
 	# Default choice
 	local default_choice=""

@@ -1,0 +1,28 @@
+{
+    "ticket_types": [
+        {
+            "key": "bugfix",
+            "label": "Bugfix",
+            "description": "Bugfix",
+            "active": 1
+        },
+        {
+            "key": "hotfix",
+            "label": "Hotfix",
+            "description": "Hotfix",
+            "active": 1
+        },
+        {
+            "key": "improvement",
+            "label": "Improvement",
+            "description": "Improvement",
+            "active": 1
+        },
+        {
+            "key": "feature",
+            "label": "Feature",
+            "description": "Feature",
+            "active": 1
+        }
+	]
+}
