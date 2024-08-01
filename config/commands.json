@@ -234,6 +234,13 @@
             "alias": "worker_tasks_main",
             "group": "misc",
             "description": "Worker Tasks entry point"
+        },
+        {
+            "command": "datetime",
+            "alt_command": "dt", 
+            "alias": "get_datetime --mysql",
+            "group": "misc",
+            "description": "DateTime functions"
         }
     ]
 }
