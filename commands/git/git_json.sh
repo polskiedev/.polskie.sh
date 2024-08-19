@@ -9,8 +9,10 @@ pathinfo_override_command_git_from_json() {
 
 	repo_path=$(git rev-parse --show-toplevel)
 	repo_name=$(basename "$repo_path")
+	repo_file="${repo_name}.json"
 
     pathinfo["settings_dir"]="$ENV_TMP_DIR/$ENV_TMP_SETTINGS"
+	pathinfo["repository_path"]="$repo_path"
 	pathinfo["repository"]="$repo_name"
 	pathinfo["branch"]="$(git branch --show-current)"
 	pathinfo["repository_base_directory"]="$(git rev-parse --show-toplevel)"
@@ -20,7 +22,7 @@ pathinfo_override_command_git_from_json() {
 	pathinfo["default_ticket_max"]="6"
 
     pathinfo["default_file"]="default.json"
-	pathinfo["repository_file"]="${repo_name}.json"
+	pathinfo["repository_file"]="$repo_file"
 	pathinfo["temp_file"]="temp.json"
 
 	pathinfo["label_ticket_format"]="Ticket Format"

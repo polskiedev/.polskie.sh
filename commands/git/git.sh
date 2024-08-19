@@ -393,7 +393,12 @@ override_command_git() {
 		config_files[$item]="${pathinfo['settings_dir']}/${pathinfo["$item"]}"
 		config_filenames[$item]="${pathinfo["$item"]}"
 	done
+	# ###############################################
+	local other_working_directory="${pathinfo["repository_path"]}/$ENV_THIRD_PARTY_WORKING_DIRECTORY/config/repositories/git"
 
+	if [[ -d "$other_working_directory" ]]; then
+		create_symlink "${pathinfo["settings_dir"]}/${pathinfo["repository_file"]}" "$other_working_directory/${pathinfo["repository_file"]}"
+	fi
 	# ###############################################
 	local repository="${pathinfo['repository']}"
 	local current_branch="${pathinfo['branch']}"
@@ -410,6 +415,7 @@ override_command_git() {
 	local latest_branch=""
 
     declare -A json_result2
+
     get_json_data json_result2 --file:"$config_file"
 	
 	if [ ! -v 'json_result2[$key_previous_branch]' ]; then

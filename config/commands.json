@@ -241,6 +241,13 @@
             "alias": "get_datetime --mysql",
             "group": "misc",
             "description": "DateTime functions"
+        },
+        {
+            "command": "readonly",
+            "alt_command": "ro", 
+            "alias": "chmod 444",
+            "group": "misc",
+            "description": "Make Read-Only"
         }
     ]
 }
