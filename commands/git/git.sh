@@ -394,10 +394,11 @@ override_command_git() {
 		config_filenames[$item]="${pathinfo["$item"]}"
 	done
 	# ###############################################
-	local other_working_directory="${pathinfo["repository_path"]}/$ENV_THIRD_PARTY_WORKING_DIRECTORY/config/repositories/git"
+	local other_working_directory="${pathinfo["repository_path"]}/$ENV_THIRD_PARTY_WORKING_DIRECTORY"
+	local other_working_file="$other_working_directory/config/repositories/git/${pathinfo["repository_file"]}"
 
-	if [[ -d "$other_working_directory" ]]; then
-		create_symlink "${pathinfo["settings_dir"]}/${pathinfo["repository_file"]}" "$other_working_directory/${pathinfo["repository_file"]}"
+	if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
+		create_symlink "${pathinfo["settings_dir"]}/${pathinfo["repository_file"]}" "$other_working_file"
 	fi
 	# ###############################################
 	local repository="${pathinfo['repository']}"
@@ -488,6 +489,16 @@ override_command_git() {
 			local latest_branch="$(git branch --show-current)"
 			if [ "$current_branch" != "$latest_branch" ]; then
 				modify_json_data --file:"$config_file" --tmpfile:"$tmp_file" --jsonkey:"$key_previous_branch" --jsonvalue:"$current_branch"
+			fi
+			
+			# "$other_working_directory/config/repositories/git-history"
+			local git_checkout_history_filename="git-checkout-history-${repository}.txt"
+			local git_checkout_history_filepath="$ENV_TMP_DIR/$ENV_TMP_LIST/$git_checkout_history_filename"
+			other_working_file="$other_working_directory/config/repositories/git-history/${repository}.txt"
+
+			add_to_temp "list" "$git_checkout_history_filename" "$current_branch"
+			if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
+				create_symlink "$git_checkout_history_filepath" "$other_working_file"
 			fi
 		else
 			log_error "Failed to checkout"
