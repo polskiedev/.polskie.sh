@@ -578,8 +578,8 @@ override_command_git() {
 			local git_checkout_history_filepath="$ENV_TMP_DIR/$ENV_TMP_LIST/$git_checkout_history_filename"
 			other_working_file="$other_working_directory/repositories/git-history/${repository}.txt"
 
-			echo "Log Checkout History: $git_checkout_history_filepath"
-			add_to_temp "list" "$git_checkout_history_filename" "$current_branch"
+			echo "Log Checkout History: '$git_command2' > '$git_checkout_history_filepath'"
+			add_to_temp "list" "$git_checkout_history_filename" "$git_command2"
 			if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
 				create_symlink "$git_checkout_history_filepath" "$other_working_file"
 			fi
