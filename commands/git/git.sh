@@ -115,10 +115,13 @@ git_actions_list_override_command_git() {
 	options["add_all"]="Git add all"
 	options["add_picked"]="Git pick then add"
 	options["create_branch"]="Create Branch"
+	options["create_branch_fast"]="Create Branch Fast"
 	options["commit"]="Commit Changes"
 	options["status"]="Git status"
 	options["add_default_config"]="Add default JSON configuration"
 	options["add_repository_config"]="Add repository JSON configuration"
+	options["switch_branch"]="Switch Branch"
+	
 	# options["test"]="Test"
 
 	# Transform the associative array into the desired format
@@ -146,6 +149,9 @@ git_actions_list_override_command_git() {
 			"create_branch")
 				create_branch_override_command_git
 				;;
+			"create_branch_fast")
+				create_branch_fast_override_command_git
+				;;
 			"status")
 				status_override_command_git
 				;;
@@ -158,6 +164,9 @@ git_actions_list_override_command_git() {
 			"add_repository_config")
 				modify_config_file_override_command_git_from_json --config:default
 				;;
+			"switch_branch")
+				switch_branch_override_command_git
+				;;
 			# "test")
 			# 	echo "Under maintenance: @test"
 			# 	local msg
@@ -169,6 +178,79 @@ git_actions_list_override_command_git() {
                 return 1
                 ;;
         esac
+	fi
+}
+
+create_branch_fast_override_command_git() {
+	eval "$(pathinfo_override_command_git_from_json)"
+	# ###############################################
+	local repository="${pathinfo['repository']}"
+	local current_branch="${pathinfo['branch']}"
+
+	if [ "$repository" = "" ]; then
+        echo "Current directory is not in any git repository."
+		return 1
+	fi
+	# ###############################################
+	cleanup_override_command_git_from_json
+
+	local new_branch="$1"
+	read -p "Please input new branch name: " new_branch
+
+	if [ -z "$new_branch" ]; then
+		echo "New branch cannot be empty"
+		return 1
+	fi
+
+	while true; do
+		local is_base_branch_ok
+		read -p "Are you want to create a new branch \`$new_branch\` based from \`${repository}\`.\`$current_branch\`? (y/n) " is_base_branch_ok
+
+        case "$is_base_branch_ok" in
+            [Yy]|[Yy][Ee][Ss])
+				git switch -c "$new_branch"
+				break
+				;;
+			[Nn]|[Nn][Oo])
+				echo "No problem!"
+				return 1
+				break
+				;;
+			*)
+				echo "Please enter yes or no."
+				;;
+		esac
+	done
+}
+
+switch_branch_override_command_git() {
+	eval "$(pathinfo_override_command_git_from_json)"
+	# ###############################################
+	local repository="${pathinfo['repository']}"
+	local current_branch="${pathinfo['branch']}"
+
+	if [ "$repository" = "" ]; then
+        echo "Current directory is not in any git repository."
+		return 1
+	fi
+	# ###############################################
+	cleanup_override_command_git_from_json
+
+	local git_checkout_history_filename="git-checkout-history-${repository}.txt"
+	local git_checkout_history_filepath="$ENV_TMP_DIR/$ENV_TMP_LIST/$git_checkout_history_filename"
+	# echo "Branch List File: $git_checkout_history_filepath"
+
+	if [[ ! -f "$git_checkout_history_filepath" ]]; then
+        echo "Repository do not have checkout history yet."
+		return 1
+	fi
+
+	chosen_option=$(cat "$git_checkout_history_filepath" | fzf)
+
+	# Check if a choice was made
+	if [ -n "$chosen_option" ]; then
+		echo "You chose: $chosen_option"
+		override_command_git checkout "$chosen_option"
 	fi
 }
 
