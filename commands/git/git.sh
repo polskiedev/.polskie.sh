@@ -476,13 +476,6 @@ override_command_git() {
 		config_filenames[$item]="${pathinfo["$item"]}"
 	done
 	# ###############################################
-	local other_working_directory="${pathinfo["repository_path"]}/$ENV_THIRD_PARTY_WORKING_DIRECTORY"
-	local other_working_file="$other_working_directory/repositories/git/${pathinfo["repository_file"]}"
-
-	if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
-		create_symlink "${pathinfo["settings_dir"]}/${pathinfo["repository_file"]}" "$other_working_file"
-	fi
-	# ###############################################
 	local repository="${pathinfo['repository']}"
 	local current_branch="${pathinfo['branch']}"
 
@@ -495,6 +488,7 @@ override_command_git() {
 	local temp_file="${config_files['temp_file']}"
 
 	local key_previous_branch="${pathinfo['key_previous_branch']}"
+	local other_working_directory="${pathinfo["repository_path"]}/$ENV_THIRD_PARTY_WORKING_DIRECTORY"
 	local latest_branch=""
 
     declare -A json_result2
@@ -554,7 +548,7 @@ override_command_git() {
 	# Temp only
 	if [ "$git_command" != "checkout" ]; then
 		command git "$git_command" "$@"
-		git "$git_command" "$@"
+		# git "$git_command" "$@"
 		return
 	fi
 	# ###############################################
@@ -576,16 +570,39 @@ override_command_git() {
 			# "$other_working_directory/config/repositories/git-history"
 			local git_checkout_history_filename="git-checkout-history-${repository}.txt"
 			local git_checkout_history_filepath="$ENV_TMP_DIR/$ENV_TMP_LIST/$git_checkout_history_filename"
-			other_working_file="$other_working_directory/repositories/git-history/${repository}.txt"
+			local other_working_file="$other_working_directory/repositories/git-history/${repository}.txt"
 
 			echo "Log Checkout History: '$git_command2' > '$git_checkout_history_filepath'"
 			add_to_temp "list" "$git_checkout_history_filename" "$git_command2"
-			if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
-				create_symlink "$git_checkout_history_filepath" "$other_working_file"
-			fi
 		else
 			log_error "Failed to checkout"
 		fi
+	fi
+
+	create_symlink_to_repository_override_command_git
+}
+
+create_symlink_to_repository_override_command_git() {
+	echo "create_symlink_to_repository_override_command_git()"
+	# ###############################################
+	eval "$(pathinfo_override_command_git_from_json)"
+	# ###############################################
+	local repository="${pathinfo['repository']}"
+	local other_working_directory="${pathinfo["repository_path"]}/$ENV_THIRD_PARTY_WORKING_DIRECTORY"
+	local other_working_file="$other_working_directory/repositories/git/${pathinfo["repository_file"]}"
+	local git_checkout_history_filename="git-checkout-history-${repository}.txt"
+	local git_checkout_history_filepath="$ENV_TMP_DIR/$ENV_TMP_LIST/$git_checkout_history_filename"
+
+	cleanup_override_command_git_from_json
+	# ###############################################
+	if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
+		create_symlink "${pathinfo["settings_dir"]}/${pathinfo["repository_file"]}" "$other_working_file"
+	fi
+
+	other_working_file="$other_working_directory/repositories/git-history/${repository}.txt"
+
+	if [[ -d "$other_working_directory" ]] && [[ ! -f "$other_working_file" ]]; then
+		create_symlink "$git_checkout_history_filepath" "$other_working_file"
 	fi
 }
 
